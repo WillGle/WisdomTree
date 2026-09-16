@@ -86,7 +86,7 @@ export function PeopleDirectory({
           headingLevel={2}
           title={translate(locale, "nav.people")}
           description={translate(locale, "people.projectDescription")}
-          actions={items.length ? createAction : null}
+          actions={items.length && canCreate && projectId ? createAction : null}
         />
       ) : (
         <PageHeader
@@ -177,7 +177,7 @@ export function PeopleDirectory({
             locale,
             isProjectDirectory ? "people.emptyProjectDescription" : "people.empty",
           )}
-          action={createAction}
+          action={canCreate && projectId ? createAction : null}
         />
       )}
       {canCreate && projectId ? (

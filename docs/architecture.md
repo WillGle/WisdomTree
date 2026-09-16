@@ -19,6 +19,38 @@ by eye — modules call each other's services freely and share transactions
 
 ## Modules
 
+### Next.js delivery
+
+The delivery layer is implemented as `src/app/**` and handles rendering, reading parameters, and calling services. It does not directly access the database — no `@/db`, no `*/schema`, no `drizzle-orm`.
+
+### Project-centric application facade
+
+The application layer provides project-centric APIs and acts as a facade
+over domain modules. It is implemented as `src/modules/application/`.
+
+- **application** — project-centric APIs for notes, materials, activities,
+tasks, people, and tempo (library/circulation).
+
+### Current product/domain modules
+
+These services implement the current project-centric vocabulary:
+
+- **project** — project domain including capabilities, permissions, and
+  project context.
+- **person** — canonical person identity independent from authenticated
+  users.
+- **activity** — collaborative work context for projects.
+- **search** — internal research search functionality.
+- **publication** — note publishing system and public versioning.
+
+These modules are conceptually distinct from the implementation infrastructure below —
+they expose project-centric operations for Notes, Materials, Activities, Tasks,
+People, Search, Publication, Tempo, etc.
+
+### Reused foundational implementation modules
+
+These modules provide the existing implementation infrastructure and legacy persistence vocabulary:
+
 - **auth** — users, sessions, the `authorize()` catalog, admin user
   management, OIDC, the dev-only demo login.
 - **storage** — spaces & membership, folders, sources (files) with
@@ -48,6 +80,16 @@ by eye — modules call each other's services freely and share transactions
   are immutable and can rebuild `data/vault-repos/<space-id>.git`.
 - **audit** — the `recordAudit` helper; `audit_events` is
   append-only (DB trigger) and read back on `/admin`.
+
+Note that the application facade exposes project-centric operations for Notes,
+Materials, Activities, Tasks, People, Search, Publication, Tempo, etc.
+
+The implementation vocabulary may adapt/reuse concepts from the legacy vocabulary:
+
+- Space / Branch / TreeNode / Source / Deadline / WikiRelease
+
+Different names across these layers are intentional and do not imply
+a schema migration is required.
 
 ## Authorization
 
@@ -125,6 +167,7 @@ Books are Library items: the `sources` row carries title/space/category
 carries the shelf facts (LIB-code, author, location, copies, status).
 Loans hang off the physical row; state transitions, the copies-vs-loans
 guards, and the per-item loan register live in `circulation/service.ts`.
+
 The loan desk is `/library/loans`; the item page hosts request/approve/
 hand-over/return.
 
