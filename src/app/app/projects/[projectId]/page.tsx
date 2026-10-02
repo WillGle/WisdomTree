@@ -1,7 +1,11 @@
 import Link from "next/link";
-import { listAppProjectNotes } from "@/modules/application";
+import {
+  listAppProjectNotes,
+  listAppProjectVaults,
+  toApplicationError,
+} from "@/modules/application";
 import { redirect } from "next/navigation";
-import { Surface, translate } from "../../../components/ui-next";
+import { Surface, translate, ErrorState, getErrorPresentation } from "../../../components/ui-next";
 import { getProjectWorkspaceContext } from "./_lib/workspace-context";
 
 const switchableModules = [
@@ -34,7 +38,13 @@ export default async function AppProjectOverviewPage({
     redirect(`/app/projects/${projectId}`);
   }
 
-  const { notes, drafts } = await listAppProjectNotes(actor, projectId);
+  const noteResult = await listAppProjectNotes(actor, projectId).then(
+    (data) => ({ data, error: null }),
+    (error) => ({ data: null, error: toApplicationError(error) }),
+  );
+  const notes = noteResult.data?.notes ?? [];
+  const drafts = noteResult.data?.drafts ?? [];
+  const vaults = await listAppProjectVaults(actor, projectId);
   const locale = application.locale;
   const base = `/app/projects/${encodeURIComponent(projectId)}`;
   const recentNotes = [...notes]
@@ -69,71 +79,97 @@ export default async function AppProjectOverviewPage({
             </section>
           ))}
       </div>
-      <div className="ui-next-research-home__columns">
-        <section className="ui-next-research-panel" aria-labelledby="research-drafts-title">
-          <h2 id="research-drafts-title">{translate(locale, "journey.resume")}</h2>
-          {drafts.length ? (
-            <ul className="ui-next-research-resume">
-              {drafts.map((draft) => (
-                <li key={draft.id}>
-                  <Link href={`${base}/notes/${encodeURIComponent(draft.noteId ?? draft.id)}`}>
-                    <strong>{draft.title || translate(locale, "notes.untitled")}</strong>
-                    <span>
-                      {translate(
-                        locale,
-                        draft.noteId ? "notes.state.draft_changes" : "notes.state.new_draft",
-                      )}{" "}
-                      <span aria-hidden="true">→</span>
-                    </span>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <div className="ui-next-research-empty">
-              <p>{translate(locale, "journey.draftsEmptyHelp")}</p>
+      <section className="ui-next-research-panel" aria-labelledby="project-vaults-title">
+        <h2 id="project-vaults-title">{translate(locale, "vault.title")}</h2>
+        <p>{translate(locale, "vault.linkHelp")}</p>
+        {vaults.length ? (
+          <ul>
+            {vaults.map((vault) => (
+              <li key={vault.id}>
+                <Link href={`/app/vaults/${vault.id}`}>{vault.name}</Link>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p>{translate(locale, "vault.empty")}</p>
+        )}
+      </section>
+      {noteResult.error ? (
+        <ErrorState
+          title={translate(locale, getErrorPresentation(noteResult.error.error).titleKey)}
+          description={translate(
+            locale,
+            getErrorPresentation(noteResult.error.error).descriptionKey,
+          )}
+          action={<Link href={base}>{translate(locale, "vault.retry")}</Link>}
+        />
+      ) : (
+        <div className="ui-next-research-home__columns">
+          <section className="ui-next-research-panel" aria-labelledby="research-drafts-title">
+            <h2 id="research-drafts-title">{translate(locale, "journey.resume")}</h2>
+            {drafts.length ? (
+              <ul className="ui-next-research-resume">
+                {drafts.map((draft) => (
+                  <li key={draft.id}>
+                    <Link href={`${base}/notes/${encodeURIComponent(draft.noteId ?? draft.id)}`}>
+                      <strong>{draft.title || translate(locale, "notes.untitled")}</strong>
+                      <span>
+                        {translate(
+                          locale,
+                          draft.noteId ? "notes.state.draft_changes" : "notes.state.new_draft",
+                        )}{" "}
+                        <span aria-hidden="true">→</span>
+                      </span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <div className="ui-next-research-empty">
+                <p>{translate(locale, "journey.draftsEmptyHelp")}</p>
+              </div>
+            )}
+            <div className="ui-next-research-actions">
+              {workspace.project.capabilities.canCreateNote ? (
+                <Link
+                  className="ui-next-button ui-next-button--primary"
+                  href={`${base}/notes?create=1`}
+                >
+                  {translate(locale, "journey.newNote")}
+                </Link>
+              ) : null}
+              {workspace.project.capabilities.canCreateMaterial ? (
+                <Link
+                  className="ui-next-button ui-next-button--secondary"
+                  href={`${base}/materials?create=1`}
+                >
+                  {translate(locale, "journey.addSource")}
+                </Link>
+              ) : null}
             </div>
-          )}
-          <div className="ui-next-research-actions">
-            {workspace.project.capabilities.canCreateNote ? (
-              <Link
-                className="ui-next-button ui-next-button--primary"
-                href={`${base}/notes?create=1`}
-              >
-                {translate(locale, "journey.newNote")}
-              </Link>
-            ) : null}
-            {workspace.project.capabilities.canCreateMaterial ? (
-              <Link
-                className="ui-next-button ui-next-button--secondary"
-                href={`${base}/materials?create=1`}
-              >
-                {translate(locale, "journey.addSource")}
-              </Link>
-            ) : null}
-          </div>
-        </section>
-        <section className="ui-next-research-panel" aria-labelledby="research-recent-title">
-          <h2 id="research-recent-title">{translate(locale, "journey.recent")}</h2>
-          {recentNotes.length ? (
-            <ul className="ui-next-research-resume">
-              {recentNotes.map((note) => (
-                <li key={note.id}>
-                  <Link href={`${base}/notes/${encodeURIComponent(note.id)}`}>
-                    <strong>{note.title}</strong>
-                    {note.summary ? <span>{note.summary}</span> : null}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p>{translate(locale, "journey.recentEmpty")}</p>
-          )}
-          <Link href={`${base}/notes`}>
-            {translate(locale, "journey.openNotes")} <span aria-hidden="true">→</span>
-          </Link>
-        </section>
-      </div>
+          </section>
+          <section className="ui-next-research-panel" aria-labelledby="research-recent-title">
+            <h2 id="research-recent-title">{translate(locale, "journey.recent")}</h2>
+            {recentNotes.length ? (
+              <ul className="ui-next-research-resume">
+                {recentNotes.map((note) => (
+                  <li key={note.id}>
+                    <Link href={`${base}/notes/${encodeURIComponent(note.id)}`}>
+                      <strong>{note.title}</strong>
+                      {note.summary ? <span>{note.summary}</span> : null}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p>{translate(locale, "journey.recentEmpty")}</p>
+            )}
+            <Link href={`${base}/notes`}>
+              {translate(locale, "journey.openNotes")} <span aria-hidden="true">→</span>
+            </Link>
+          </section>
+        </div>
+      )}
       {workspace.modules.tasks || workspace.modules.activities ? (
         <section className="ui-next-research-planning" aria-labelledby="research-planning-title">
           <div>

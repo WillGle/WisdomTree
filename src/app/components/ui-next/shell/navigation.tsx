@@ -23,6 +23,7 @@ type Destination = {
 
 const destinations: Destination[] = [
   { href: "/app", group: "research", labelKey: "nav.overview", icon: "overview" },
+  { href: "/app/vaults", group: "research", labelKey: "nav.vaults", icon: "projects" },
   { href: "/app/projects", group: "research", labelKey: "nav.projects", icon: "projects" },
   { href: "/app/calendar", group: "organize", labelKey: "nav.calendar", icon: "calendar" },
   { href: "/app/my-work", group: "organize", labelKey: "nav.myWork", icon: "work" },
