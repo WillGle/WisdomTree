@@ -1,6 +1,6 @@
 # WisdomTree — thiết kế lấy vault làm trung tâm
 
-Ngày: 2026-10-02. Bản đầu đã được duyệt; bản cập nhật bổ sung hồ sơ dự án/hoạt động và ERD theo hội thoại, chờ duyệt tài liệu cập nhật trước khi lập kế hoạch.
+Ngày: 2026-10-02. Bản đầu và bản cập nhật bổ sung hồ sơ dự án/hoạt động, ERD đã được người dùng duyệt; được phép lập kế hoạch triển khai.
 
 ## 1. Mục tiêu đã thống nhất
 
@@ -225,4 +225,4 @@ Phần 1 là phần lập kế hoạch đầu tiên sau khi tài liệu cập nh
 
 ## 11. Trạng thái duyệt và bước tiếp theo
 
-Người dùng đã duyệt bản đầu, sau đó bổ sung nhu cầu lưu hồ sơ dự án/hoạt động và đồng ý ERD tách Vault–Project–Activity. Bản cập nhật này thay thế giả định Vault = Project, ghi lại hoạt động độc lập, các liên kết nhiều–nhiều, phân loại, graph, báo cáo và portfolio. Các quyết định không bị thay thế của bản đầu vẫn giữ nguyên. Người dùng xem tài liệu cập nhật trước khi lập kế hoạch triển khai phần 1; chưa có thay đổi schema, code sản phẩm hoặc dữ liệu thật trong giai đoạn thiết kế.
+Người dùng đã duyệt bản đầu, sau đó bổ sung nhu cầu lưu hồ sơ dự án/hoạt động và đồng ý ERD tách Vault–Project–Activity. Bản cập nhật này thay thế giả định Vault = Project, ghi lại hoạt động độc lập, các liên kết nhiều–nhiều, phân loại, graph, báo cáo và portfolio. Các quyết định không bị thay thế của bản đầu vẫn giữ nguyên. Người dùng đã duyệt tài liệu cập nhật sau commit 0ed9a80 và cho phép lập kế hoạch triển khai phần 1; chưa có thay đổi schema, code sản phẩm hoặc dữ liệu thật trong giai đoạn thiết kế.
