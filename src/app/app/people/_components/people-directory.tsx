@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import type { UiLocale } from "@/modules/auth/profile";
 import {
   Button,
@@ -20,12 +21,15 @@ export function PeopleDirectory({
   people,
   projectId,
   canCreate,
+  initialCreate = false,
 }: {
   locale: UiLocale;
   people: Person[];
   projectId?: string;
   canCreate?: boolean;
+  initialCreate?: boolean;
 }) {
+  const router = useRouter();
   const [items, setItems] = useState(people);
   const [creating, setCreating] = useState(false);
   const [error, setError] = useState(false);
@@ -38,6 +42,14 @@ export function PeopleDirectory({
       .toLocaleLowerCase(locale)
       .includes(query.trim().toLocaleLowerCase(locale)),
   );
+
+  useEffect(() => {
+    if (!initialCreate || !canCreate || !projectId) return;
+    setCreateOpen(true);
+    const url = new URL(window.location.href);
+    url.searchParams.delete("create");
+    router.replace(url.pathname + url.search, { scroll: false });
+  }, [initialCreate, canCreate, projectId, router]);
 
   async function createPerson(form: FormData) {
     if (!projectId || !canCreate || creating) return;

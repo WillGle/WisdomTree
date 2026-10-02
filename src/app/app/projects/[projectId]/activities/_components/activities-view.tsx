@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { UiLocale } from "@/modules/auth/profile";
 import {
   Button,
@@ -26,16 +26,26 @@ export function ActivitiesView({
   locale,
   activities,
   canCreate,
+  initialCreate = false,
 }: {
   projectId: string;
   locale: UiLocale;
   activities: Activity[];
   canCreate: boolean;
+  initialCreate?: boolean;
 }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    if (!initialCreate || !canCreate || !projectId) return;
+    setOpen(true);
+    const url = new URL(window.location.href);
+    url.searchParams.delete("create");
+    router.replace(url.pathname + url.search, { scroll: false });
+  }, [initialCreate, canCreate, projectId, router]);
 
   async function createActivity(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { PageContainer, PageHeader, Stack, Surface, translate, Button } from "@/app/components/ui-next";
+import { PageContainer, PageHeader, Stack, Surface, translate } from "@/app/components/ui-next";
 import { getAppPerson, toApplicationError } from "@/modules/application";
 import { getAppRequestContext } from "../../_lib/request-context";
 

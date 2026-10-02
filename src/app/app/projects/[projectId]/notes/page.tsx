@@ -4,8 +4,10 @@ import { NotesView } from "./_components/notes-view";
 
 export default async function ProjectNotesPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ projectId: string }>;
+  searchParams: Promise<{ create?: string }>;
 }) {
   const { projectId } = await params;
   const { actor, application, workspace } = await requireProjectModule(projectId, "notes");
@@ -13,6 +15,7 @@ export default async function ProjectNotesPage({
 
   return (
     <NotesView
+      initialCreate={(await searchParams).create === "1"}
       projectId={projectId}
       locale={application.locale}
       notes={notes}

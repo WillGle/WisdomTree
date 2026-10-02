@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { UiLocale } from "@/modules/auth/profile";
 import {
   Button,
@@ -35,16 +35,26 @@ export function MaterialsView({
   locale,
   materials,
   canCreateMaterial,
+  initialCreate = false,
 }: {
   projectId: string;
   locale: UiLocale;
   materials: MaterialItem[];
   canCreateMaterial: boolean;
+  initialCreate?: boolean;
 }) {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!initialCreate || !canCreateMaterial || !projectId) return;
+    setIsOpen(true);
+    const url = new URL(window.location.href);
+    url.searchParams.delete("create");
+    router.replace(url.pathname + url.search, { scroll: false });
+  }, [initialCreate, canCreateMaterial, projectId, router]);
 
   async function createMaterial(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();

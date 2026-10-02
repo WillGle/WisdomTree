@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { UiLocale } from "@/modules/auth/profile";
 import type { DraftDto } from "@/modules/application";
@@ -9,12 +9,14 @@ import { NoteList } from "./note-list";
 
 export function NotesView({
   projectId,
+  initialCreate = false,
   locale,
   notes,
   drafts,
   canCreateNote,
 }: {
   projectId: string;
+  initialCreate?: boolean;
   locale: UiLocale;
   notes: Array<{
     id: string;
@@ -29,10 +31,17 @@ export function NotesView({
   canCreateNote: boolean;
 }) {
   const router = useRouter();
-  const [createOpen, setCreateOpen] = useState(false);
+  const [createOpen, setCreateOpen] = useState(initialCreate && canCreateNote);
   const [title, setTitle] = useState("");
   const [isCreating, setIsCreating] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!initialCreate) return;
+    const url = new URL(window.location.href);
+    url.searchParams.delete("create");
+    window.history.replaceState(window.history.state, "", url);
+  }, [initialCreate]);
 
   async function handleCreate(e: React.FormEvent) {
     e.preventDefault();

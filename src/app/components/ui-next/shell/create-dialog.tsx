@@ -282,7 +282,7 @@ export function CreateDialog({
                             canCreateTask: "tasks",
                             canManagePeople: "people",
                           }[action.capability];
-                          window.location.href = `/app/projects/${encodeURIComponent(selected.id)}/${destination}`;
+                          window.location.href = `/app/projects/${encodeURIComponent(selected.id)}/${destination}?create=1`;
                         }}
                       >
                         <span className="min-w-0 grid gap-1">
