@@ -1,3 +1,4 @@
+import { requireSpaceVaultAccess, restrictVaultSpaceVisibility } from "../vault/access";
 import { and, desc, eq, inArray, sql } from "drizzle-orm";
 import { db, type Tx } from "@/db";
 import { ApiError, notFound } from "@/lib/errors";
@@ -33,6 +34,7 @@ async function requireOwnedProjectDraft(
     .innerJoin(projects, eq(projects.projectId, nodeDrafts.projectId))
     .where(and(eq(nodeDrafts.id, draftId), eq(nodeDrafts.authorId, actor.userId)));
   if (!draft || draft.node_drafts.locale !== "vi") throw notFound();
+  await requireSpaceVaultAccess(actor, draft.projects.projectId, "draft", runner);
   authorize(actor, "project.note.create", {
     spaceId: draft.projects.projectId,
     kind: "write",
@@ -61,6 +63,7 @@ async function requireSupportingSourceVersion(
     .innerJoin(projects, eq(projects.projectId, sources.spaceId))
     .where(eq(sourceVersions.id, sourceVersionId));
   if (!row) throw notFound();
+  await requireSpaceVaultAccess(actor, row.projectId, "read", runner);
   await requireProjectResearchRead(actor, row.projectId, runner);
   return row;
 }
@@ -83,6 +86,7 @@ async function requireSupportingNoteVersion(
     .innerJoin(projects, eq(projects.projectId, treeNodes.projectId))
     .where(eq(treeNodeVersions.id, noteVersionId));
   if (!row) throw notFound();
+  await requireSpaceVaultAccess(actor, row.projectId, "read", runner);
   await requireProjectResearchRead(actor, row.projectId, runner);
   return row;
 }
@@ -224,6 +228,7 @@ export async function listDraftSupportingResearch(actor: Principal, draftId: str
       .where(
         and(
           eq(draftSupportSourceVersions.draftId, draftId),
+          restrictVaultSpaceVisibility(actor, projects.projectId),
           inArray(projects.projectId, visibleProjects),
         ),
       ),
@@ -242,6 +247,7 @@ export async function listDraftSupportingResearch(actor: Principal, draftId: str
       .where(
         and(
           eq(draftSupportNoteVersions.draftId, draftId),
+          restrictVaultSpaceVisibility(actor, projects.projectId),
           inArray(projects.projectId, visibleProjects),
         ),
       ),
@@ -277,6 +283,7 @@ export async function listNoteVersionSupportingResearch(
     .innerJoin(projects, eq(projects.projectId, treeNodes.projectId))
     .where(eq(treeNodeVersions.id, targetNoteVersionId));
   if (!target) throw notFound();
+  await requireSpaceVaultAccess(actor, target.projectId, "read");
   await requireProjectResearchRead(actor, target.projectId);
   if (!target.supportSnapshotComplete) {
     return { snapshotStatus: "unknown" as const, sourceVersions: [], noteVersions: [] };
@@ -304,6 +311,7 @@ export async function listNoteVersionSupportingResearch(
       .where(
         and(
           eq(noteVersionSupportSourceVersions.targetNoteVersionId, targetNoteVersionId),
+          restrictVaultSpaceVisibility(actor, projects.projectId),
           inArray(projects.projectId, visibleProjects),
         ),
       ),
@@ -325,6 +333,7 @@ export async function listNoteVersionSupportingResearch(
       .where(
         and(
           eq(noteVersionSupportNoteVersions.targetNoteVersionId, targetNoteVersionId),
+          restrictVaultSpaceVisibility(actor, projects.projectId),
           inArray(projects.projectId, visibleProjects),
         ),
       ),

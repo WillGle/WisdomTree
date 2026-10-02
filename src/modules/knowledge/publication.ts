@@ -1,3 +1,4 @@
+import { requireSpaceVaultAccess } from "../vault/access";
 import { and, asc, eq, inArray, sql } from "drizzle-orm";
 import { db, type Tx } from "@/db";
 import { ApiError, notFound, versionConflict } from "@/lib/errors";
@@ -143,6 +144,7 @@ export async function submitNodePublication(
   if (!target || target.branch.archivedAt || target.branch.scope !== "team") {
     throw new ApiError(400, "invalid_target_branch", "Invalid target team branch.");
   }
+  await requireSpaceVaultAccess(actor, target.branch.spaceId, "draft");
   authorize(actor, "knowledge.submit", { spaceId: target.branch.spaceId!, kind: "write" });
   const [pending] = await db
     .select({ id: nodeProposals.id })
@@ -306,6 +308,7 @@ export async function getNodePublicationReview(actor: Principal, proposalId: str
     .innerJoin(users, eq(users.id, nodeProposals.createdBy))
     .where(and(eq(nodeProposals.kind, "publication"), eq(nodeProposals.id, proposalId)));
   if (!row) throw notFound();
+  await requireSpaceVaultAccess(actor, row.targetSpaceId, "read");
   authorize(actor, "knowledge.publish", { spaceId: row.targetSpaceId!, kind: "read" });
   const source = row.proposal.sourceVersionId
     ? (
@@ -352,6 +355,7 @@ export async function decideNodePublication(
       ),
     );
   if (!row) throw notFound();
+  await requireSpaceVaultAccess(actor, row.targetSpaceId, "write");
   authorize(actor, "knowledge.publish", { spaceId: row.targetSpaceId!, kind: "write" });
   assertIndependentReviewer(actor.userId, { submittedBy: row.proposal.createdBy });
   const note = input.note?.trim() || null;

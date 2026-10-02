@@ -1,3 +1,4 @@
+import { requireSpaceVaultAccess, restrictVaultSpaceVisibility } from "../vault/access";
 import { and, desc, eq, inArray, isNull, sql } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 import { db, type Tx } from "@/db";
@@ -53,6 +54,7 @@ async function isConfirmedProject(runner: Tx | typeof db, projectId: string) {
 
 async function requestLoanWithMode(actor: Principal, sourceId: string, mode: "legacy" | "project") {
   const { item, spaceId } = await loadItemBySource(db, sourceId);
+  await requireSpaceVaultAccess(actor, spaceId, "read");
   if (mode === "project") {
     await requireProjectCapability(spaceId, "library_circulation");
   } else if (await isConfirmedProject(db, spaceId)) {
@@ -200,6 +202,7 @@ async function librarianTransition(
       .innerJoin(sources, eq(sourcePhysical.sourceId, sources.id))
       .where(eq(sourcePhysical.id, ticket.itemId));
     if (!ownership) throw notFound();
+    await requireSpaceVaultAccess(actor, ownership.projectId, "write", tx);
     if (mode === "project" || (await isConfirmedProject(tx, ownership.projectId))) {
       await requireProjectLibraryOperator(actor, ownership.projectId, tx);
     } else {
@@ -312,6 +315,7 @@ export async function listTickets(actor: Principal, states?: TicketRow["state"][
     .where(
       and(
         isNull(projects.projectId),
+        restrictVaultSpaceVisibility(actor, sources.spaceId),
         ...(states?.length ? [inArray(loanTickets.state, states)] : []),
       ),
     )
@@ -324,6 +328,7 @@ export async function listProjectLoans(
   projectId: string,
   states?: TicketRow["state"][],
 ) {
+  await requireSpaceVaultAccess(actor, projectId, "read");
   await requireProjectLibraryOperator(actor, projectId);
   return db
     .select({
@@ -354,6 +359,7 @@ export async function listProjectLoans(
  */
 export async function listTicketsForItem(actor: Principal, sourceId: string) {
   const { item, spaceId } = await loadItemBySource(db, sourceId);
+  await requireSpaceVaultAccess(actor, spaceId, "read");
   if (await isConfirmedProject(db, spaceId)) {
     await requireProjectLibraryOperator(actor, spaceId);
   } else {
@@ -388,6 +394,11 @@ export async function myTickets(actor: Principal) {
     .from(loanTickets)
     .innerJoin(sourcePhysical, eq(loanTickets.itemId, sourcePhysical.id))
     .innerJoin(sources, eq(sourcePhysical.sourceId, sources.id))
-    .where(eq(loanTickets.borrowerId, actor.userId))
+    .where(
+      and(
+        eq(loanTickets.borrowerId, actor.userId),
+        restrictVaultSpaceVisibility(actor, sources.spaceId),
+      ),
+    )
     .orderBy(desc(loanTickets.updatedAt));
 }

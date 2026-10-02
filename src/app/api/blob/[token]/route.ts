@@ -1,3 +1,6 @@
+import { requirePrincipal } from "@/lib/request";
+import { requireVaultAccess } from "@/modules/vault/access";
+import { getDownloadAccessContext } from "@/modules/storage/service";
 import { handleApi, notFound } from "@/lib/errors";
 import { verifyDownload } from "@/lib/sign";
 import { getObject } from "@/modules/storage/object-store";
@@ -11,6 +14,8 @@ export async function GET(_request: Request, { params }: { params: Promise<{ tok
     const { token } = await params;
     const grant = verifyDownload(token);
     if (!grant) throw notFound();
+    const context = await getDownloadAccessContext(grant.objectKey);
+    if (context) await requireVaultAccess(await requirePrincipal(), context.vaultId, "read");
     const object = await getObject(grant.objectKey).catch(() => null);
     if (!object) throw notFound();
     // Images and PDFs render in the page (the detail screen's preview panel);
@@ -24,7 +29,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ tok
         "Content-Disposition": `${inline ? "inline" : "attachment"}; filename*=UTF-8''${encodeURIComponent(grant.filename)}`,
         // The token IS the cache key: it names one immutable object version
         // and dies in minutes, so the browser may keep the bytes that long.
-        "Cache-Control": "private, max-age=300, immutable",
+        "Cache-Control": context ? "private, no-store" : "private, max-age=300, immutable",
         "X-Content-Type-Options": "nosniff",
       },
     });

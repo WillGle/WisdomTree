@@ -1,3 +1,4 @@
+import { requireSpaceVaultAccess } from "../vault/access";
 import { and, asc, eq, isNull, sql } from "drizzle-orm";
 import { db, type Tx } from "@/db";
 import { ApiError, notFound, versionConflict } from "@/lib/errors";
@@ -51,6 +52,7 @@ async function requireProjectLibraryOperatorIfConfirmed(
   projectId: string,
   runner: Tx | typeof db = db,
 ) {
+  await requireSpaceVaultAccess(actor, projectId, "write", runner);
   const [project] = await runner
     .select({ id: projects.projectId })
     .from(projects)
@@ -139,7 +141,8 @@ export async function addProjectMaterialPhysical(
     copies?: unknown;
   },
 ) {
-  const source = await requireProjectMaterial(input.projectId, input.sourceId);
+  const source = await requireProjectMaterial(actor, input.projectId, input.sourceId);
+  await requireSpaceVaultAccess(actor, input.projectId, "write");
   await requireProjectLibraryOperator(actor, input.projectId);
   const copies = parseCopies(input.copies);
 
@@ -287,6 +290,7 @@ export async function setPhysicalCover(actor: Principal, sourceId: string, file:
 export async function getPhysicalCover(actor: Principal, sourceId: string) {
   const { physical: item, source } = await loadPhysical(db, sourceId);
   if (item.archivedAt || !item.coverPhotoKey) throw notFound();
+  await requireSpaceVaultAccess(actor, source.spaceId, "read");
   authorize(actor, "storage.library.browse", { spaceId: source.spaceId, kind: "read" });
   return getObject(item.coverPhotoKey).catch(() => null);
 }
@@ -337,6 +341,7 @@ export async function getPhysicalDetail(actor: Principal, sourceId: string) {
     .innerJoin(sources, eq(sourcePhysical.sourceId, sources.id))
     .where(and(eq(sourcePhysical.sourceId, sourceId), isNull(sourcePhysical.archivedAt)));
   if (!row) return null;
+  await requireSpaceVaultAccess(actor, row.spaceId, "read");
   authorize(actor, "storage.library.browse", { spaceId: row.spaceId, kind: "read" });
   const onLoan = await activeLoanCount(db, row.physical.id);
   const [myActive] = await db
@@ -362,6 +367,7 @@ export async function getPhysicalDetail(actor: Principal, sourceId: string) {
 /** Physical holdings only, scoped to a capability-enabled Project Library. */
 export async function listProjectPhysicalHoldings(actor: Principal, projectId: string) {
   await requireProjectCapability(projectId, "library_circulation");
+  await requireSpaceVaultAccess(actor, projectId, "read");
   authorize(actor, "storage.library.browse", { spaceId: projectId, kind: "read" });
   const activeStates = sql.join(
     ACTIVE_LOAN_STATES.map((state) => sql`${state}`),

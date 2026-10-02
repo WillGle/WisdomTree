@@ -1,3 +1,4 @@
+import { requireSpaceVaultAccess, restrictVaultSpaceVisibility } from "../vault/access";
 import { and, asc, desc, eq, gt, inArray, isNull, ne } from "drizzle-orm";
 import { db } from "@/db";
 import { ApiError, notFound } from "@/lib/errors";
@@ -46,6 +47,7 @@ async function authorizeAnchorRead(
     case "source": {
       const [source] = await db.select().from(sources).where(eq(sources.id, anchorId));
       if (!source) throw notFound();
+      await requireSpaceVaultAccess(actor, source.spaceId, "read");
       authorize(actor, "storage.library.browse", { spaceId: source.spaceId, kind: "read" });
       return;
     }
@@ -63,6 +65,7 @@ async function authorizeAnchorRead(
       if (node.scope === "personal") {
         if (node.ownerUserId !== actor.userId) throw notFound();
       } else {
+        await requireSpaceVaultAccess(actor, node.spaceId, "read");
         authorize(actor, "knowledge.space.read", { spaceId: node.spaceId!, kind: "read" });
       }
       return;
@@ -448,13 +451,23 @@ export async function buildNotificationLinkContext(
         ? db
             .select({ id: sources.id, projectId: sources.spaceId, title: sources.title })
             .from(sources)
-            .where(inArray(sources.id, [...sourceIds]))
+            .where(
+              and(
+                inArray(sources.id, [...sourceIds]),
+                restrictVaultSpaceVisibility(actor, sources.spaceId),
+              ),
+            )
         : [],
       nodeIds.size
         ? db
             .select({ id: treeNodes.id, projectId: treeNodes.projectId, title: treeNodes.title })
             .from(treeNodes)
-            .where(inArray(treeNodes.id, [...nodeIds]))
+            .where(
+              and(
+                inArray(treeNodes.id, [...nodeIds]),
+                restrictVaultSpaceVisibility(actor, treeNodes.projectId),
+              ),
+            )
         : [],
       deadlineIds.size
         ? db

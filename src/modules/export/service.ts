@@ -1,3 +1,4 @@
+import { requireSpaceVaultAccess } from "../vault/access";
 import path from "node:path";
 import { and, desc, eq, inArray, ne, sql } from "drizzle-orm";
 import { db, ping } from "@/db";
@@ -89,7 +90,12 @@ export async function triggerTreeExport(actor: Principal): Promise<TreeExportRes
     })
     .from(treeNodes)
     .innerJoin(branches, eq(treeNodes.branchId, branches.id))
-    .where(ne(treeNodes.verification, "archived"))
+    .where(
+      and(
+        ne(treeNodes.verification, "archived"),
+        sql`NOT EXISTS (SELECT 1 FROM vaults WHERE vaults.id = ${branches.spaceId})`,
+      ),
+    )
     .orderBy(branches.name, treeNodes.slug);
 
   const tagRows = await db
@@ -145,6 +151,7 @@ const releaseRepo = (spaceId: string) =>
   path.resolve(process.env.VAULT_GIT_DIR ?? "./data/vault-repos", `${spaceId}.git`);
 
 async function releaseSpace(actor: Principal, spaceId: string, kind: "read" | "write") {
+  await requireSpaceVaultAccess(actor, spaceId, kind === "read" ? "read" : "manage");
   authorize(actor, kind === "read" ? "knowledge.space.read" : "export.space.release", {
     spaceId,
     kind,

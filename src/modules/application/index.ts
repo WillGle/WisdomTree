@@ -16,3 +16,5 @@ export * from "./graph";
 export * from "./errors";
 export * from "./admin";
 export * from "./collaboration";
+
+export * from "./vaults";

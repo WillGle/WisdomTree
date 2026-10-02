@@ -1,3 +1,4 @@
+import { requireSpaceVaultAccess, restrictVaultSpaceVisibility } from "../vault/access";
 import { and, asc, eq, isNull } from "drizzle-orm";
 import { db } from "@/db";
 import { ApiError, notFound } from "@/lib/errors";
@@ -39,6 +40,7 @@ export async function requestExtraction(
   method: ExtractionMethod,
 ) {
   const row = await loadSourceVersion(sourceId, versionId);
+  await requireSpaceVaultAccess(actor, row.source.spaceId, "write");
   authorize(actor, "storage.source.manage", {
     ownerIds: [row.source.submittedBy, row.source.assignedTo],
     kind: "write",
@@ -91,7 +93,9 @@ export async function requestProjectMaterialExtraction(
   actor: Principal,
   input: { projectId: string; sourceId: string; sourceVersionId: string; method: ExtractionMethod },
 ) {
+  await requireSpaceVaultAccess(actor, input.projectId, "read");
   await requireProjectResearchRead(actor, input.projectId);
+  await requireSpaceVaultAccess(actor, input.projectId, "write");
   authorize(actor, "storage.upload", { spaceId: input.projectId, kind: "write" });
 
   const [row] = await db
@@ -133,6 +137,7 @@ export async function listPersonalCandidates(actor: Principal) {
         eq(extractionCandidates.createdBy, actor.userId),
         eq(extractionCandidates.state, "pending_review"),
         isNull(projects.projectId),
+        restrictVaultSpaceVisibility(actor, sources.spaceId),
       ),
     )
     .orderBy(asc(extractionCandidates.createdAt));
@@ -144,6 +149,13 @@ export async function rejectCandidate(actor: Principal, candidateId: string) {
     .from(extractionCandidates)
     .where(eq(extractionCandidates.id, candidateId));
   if (!candidate || !canActOnCandidate(actor, candidate)) throw notFound();
+  const [source] = await db
+    .select({ spaceId: sources.spaceId })
+    .from(sourceVersions)
+    .innerJoin(sources, eq(sources.id, sourceVersions.sourceId))
+    .where(eq(sourceVersions.id, candidate.sourceVersionId));
+  if (!source) throw notFound();
+  await requireSpaceVaultAccess(actor, source.spaceId, "write");
   if (candidate.state !== "pending_review") {
     throw new ApiError(409, "invalid_state", "This extraction candidate has already been handled.");
   }
@@ -189,7 +201,13 @@ export async function evolveCandidate(
     .innerJoin(sourceVersions, eq(extractionCandidates.sourceVersionId, sourceVersions.id))
     .innerJoin(sources, eq(sourceVersions.sourceId, sources.id))
     .leftJoin(projects, eq(projects.projectId, sources.spaceId))
-    .where(and(eq(extractionCandidates.id, candidateId), isNull(projects.projectId)));
+    .where(
+      and(
+        eq(extractionCandidates.id, candidateId),
+        isNull(projects.projectId),
+        restrictVaultSpaceVisibility(actor, sources.spaceId),
+      ),
+    );
   if (!candidate || !canActOnCandidate(actor, candidate.candidate)) throw notFound();
   if (candidate.candidate.state !== "pending_review") {
     throw new ApiError(409, "invalid_state", "This extraction candidate has already been handled.");
@@ -301,6 +319,7 @@ export async function evolveCandidateIntoProjectNote(
 
     // A Project outsider must not learn whether a candidate exists. A viewer
     // may see the Project but still cannot perform the contributor mutation.
+    await requireSpaceVaultAccess(actor, row.projectId, "draft", tx);
     await requireProjectResearchRead(actor, row.projectId, tx);
     authorize(actor, "project.note.read", { spaceId: row.projectId, kind: "read" });
     if (row.candidate.state !== "pending_review") {
@@ -365,6 +384,7 @@ export async function getProjectMaterialExtraction(
   actor: Principal,
   input: { projectId: string; sourceId: string },
 ) {
+  await requireSpaceVaultAccess(actor, input.projectId, "read");
   await requireProjectResearchRead(actor, input.projectId);
   const [row] = await db
     .select({
@@ -395,7 +415,9 @@ export async function getProjectMaterialCandidateForReview(
   actor: Principal,
   input: { projectId: string; sourceId: string; sourceVersionId: string },
 ) {
+  await requireSpaceVaultAccess(actor, input.projectId, "read");
   await requireProjectResearchRead(actor, input.projectId);
+  await requireSpaceVaultAccess(actor, input.projectId, "write");
   authorize(actor, "storage.upload", { spaceId: input.projectId, kind: "write" });
   const [row] = await db
     .select({
@@ -427,6 +449,7 @@ export async function listProjectMaterialLineageNotes(
   actor: Principal,
   input: { projectId: string; sourceId: string },
 ) {
+  await requireSpaceVaultAccess(actor, input.projectId, "read");
   await requireProjectResearchRead(actor, input.projectId);
   return db
     .select({
@@ -459,6 +482,7 @@ export async function listMyProjectMaterialWorkingDrafts(
   actor: Principal,
   input: { projectId: string; sourceId: string },
 ) {
+  await requireSpaceVaultAccess(actor, input.projectId, "read");
   await requireProjectResearchRead(actor, input.projectId);
   return db
     .select({

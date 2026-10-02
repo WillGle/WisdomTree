@@ -45,3 +45,22 @@ export type PublicationStatusDto = {
   sourceNoteVersionId: string | null;
   hasUnpublishedChanges: boolean;
 };
+
+export type AppVaultDto = {
+  id: string;
+  name: string;
+  description: string | null;
+  version: number;
+  role: "owner" | "contributor" | "viewer";
+  capabilities: { canManage: boolean; canWrite: boolean; canDraft: boolean };
+};
+
+export type VaultDraftDto = {
+  id: string;
+  noteId: string | null;
+  vaultId: string;
+  title: string;
+  contentMd: string;
+  version: number;
+  authorPrivate: true;
+};

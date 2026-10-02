@@ -1,3 +1,4 @@
+import { requireSpaceVaultAccess } from "../vault/access";
 import { and, asc, eq, inArray, ne, notInArray, sql } from "drizzle-orm";
 import { db, type Tx } from "@/db";
 import { ApiError, notFound, versionConflict } from "@/lib/errors";
@@ -366,6 +367,7 @@ export async function updateNode(
   const [node] = await db.select().from(treeNodes).where(eq(treeNodes.id, nodeId));
   if (!node) throw notFound();
   const [branch] = await db.select().from(branches).where(eq(branches.id, node.branchId));
+  await requireSpaceVaultAccess(actor, branch?.spaceId, "read");
   const isOwnPersonalBranch =
     branch?.scope === "personal" &&
     (branch.ownerUserId === actor.userId || branch.createdBy === actor.userId);
@@ -507,6 +509,7 @@ export async function proposeNodeChange(
   const [node] = await db.select().from(treeNodes).where(eq(treeNodes.id, nodeId));
   if (!node || node.verification === "archived") throw notFound();
   const [branch] = await db.select().from(branches).where(eq(branches.id, node.branchId));
+  await requireSpaceVaultAccess(actor, branch?.spaceId, "read");
   if (!branch) throw notFound();
   const isOwnPersonalBranch =
     branch.scope === "personal" &&
@@ -518,6 +521,7 @@ export async function proposeNodeChange(
       "Personal nodes are edited directly; no proposal needed.",
     );
   }
+  await requireSpaceVaultAccess(actor, branch.spaceId, "draft");
   authorize(actor, "knowledge.node.edit", { spaceId: branch.spaceId ?? undefined, kind: "write" });
 
   const [currentTags, currentLinks] = await Promise.all([
@@ -586,6 +590,7 @@ export async function reviewNodeProposal(
       ),
     );
   if (!row || row.proposal.state !== "pending") throw notFound();
+  await requireSpaceVaultAccess(actor, row.spaceId, "write");
   authorize(actor, "knowledge.publish", { spaceId: row.spaceId ?? undefined, kind: "write" });
   // Proposer cannot approve their own change; the node's original author may
   // review someone else's proposal — the separation is on this proposal.
@@ -719,6 +724,7 @@ export async function archiveNode(actor: Principal, nodeId: string) {
       kind: "write",
     });
   } else {
+    await requireSpaceVaultAccess(actor, row.branch.spaceId, "write");
     authorize(actor, "knowledge.archive", { spaceId: row.branch.spaceId!, kind: "write" });
   }
   const node = row.node;
@@ -808,6 +814,7 @@ export async function archiveBranch(actor: Principal, branchId: string) {
       kind: "write",
     });
   } else {
+    await requireSpaceVaultAccess(actor, branch.spaceId, "manage");
     authorize(actor, "knowledge.branch.manage", { spaceId: branch.spaceId!, kind: "write" });
   }
   if (branch.archivedAt) return branch;
@@ -922,6 +929,7 @@ export async function mergeNode(actor: Principal, nodeId: string, canonicalNodeI
       kind: "write",
     });
   } else {
+    await requireSpaceVaultAccess(actor, nodeRow.spaceId, "write");
     authorize(actor, "knowledge.node.merge", { spaceId: nodeRow.spaceId!, kind: "write" });
   }
   const node = nodeRow.node;

@@ -8,7 +8,9 @@ import { requireProjectResearchRead } from "../auth/core";
 import { users } from "../auth/schema";
 import { recordAudit } from "../audit/service";
 import { projects } from "../project/schema";
+import { spaces } from "../storage/schema";
 import { extractionCandidates } from "../storage/schema";
+import { requireSpaceVaultAccess, requireVaultAccess } from "../vault/access";
 import {
   branches,
   nodeDrafts,
@@ -85,6 +87,7 @@ async function requireConfirmedProject(
     .where(eq(projects.projectId, projectId));
   if (!project) throw notFound();
   await requireProjectResearchRead(actor, project.projectId, runner);
+  await requireSpaceVaultAccess(actor, project.projectId, "read", runner);
   return project;
 }
 
@@ -121,6 +124,7 @@ export async function createProjectNoteInTransaction(
 ) {
   const project = await requireConfirmedProject(tx, actor, input.projectId);
   authorize(actor, "project.note.create", { spaceId: project.projectId, kind: "write" });
+  await requireSpaceVaultAccess(actor, project.projectId, "draft", tx);
   const snapshot = cleanSnapshot({
     title: input.title ?? "",
     summary: input.summary,
@@ -277,7 +281,9 @@ const translationSlug = (title: string) =>
 async function teamBranch(actor: Principal, branchId: string) {
   const [branch] = await db.select().from(branches).where(eq(branches.id, branchId));
   if (!branch || branch.scope !== "team" || branch.archivedAt || !branch.spaceId) throw notFound();
-  authorize(actor, "knowledge.draft.write", { spaceId: branch.spaceId, kind: "write" });
+  const vaultAccess = await requireSpaceVaultAccess(actor, branch.spaceId, "draft");
+  if (!vaultAccess)
+    authorize(actor, "knowledge.draft.write", { spaceId: branch.spaceId, kind: "write" });
   return branch;
 }
 
@@ -290,7 +296,9 @@ async function ownedDraft(actor: Principal, draftId: string) {
     .where(and(eq(nodeDrafts.id, draftId), eq(nodeDrafts.authorId, actor.userId)));
   if (!row || row.branch.scope !== "team" || !row.branch.spaceId || row.branch.archivedAt)
     throw notFound();
-  authorize(actor, "knowledge.draft.write", { spaceId: row.branch.spaceId, kind: "write" });
+  const vaultAccess = await requireSpaceVaultAccess(actor, row.branch.spaceId, "draft");
+  if (!vaultAccess)
+    authorize(actor, "knowledge.draft.write", { spaceId: row.branch.spaceId, kind: "write" });
   return row;
 }
 
@@ -350,6 +358,7 @@ async function officialSnapshot(nodeId: string, locale: DraftLocale) {
 
 export async function getMyNodeDraft(actor: Principal, nodeId: string, locale: DraftLocale = "vi") {
   const official = await officialSnapshot(nodeId, locale);
+  await requireSpaceVaultAccess(actor, official.branch.spaceId, "draft");
   authorize(actor, "knowledge.draft.write", { spaceId: official.branch.spaceId!, kind: "write" });
   const [draft] = await db
     .select()
@@ -434,6 +443,7 @@ export async function saveNodeDraft(
   },
 ) {
   const official = await officialSnapshot(nodeId, locale);
+  await requireSpaceVaultAccess(actor, official.branch.spaceId, "draft");
   authorize(actor, "knowledge.draft.write", { spaceId: official.branch.spaceId!, kind: "write" });
   if (official.node.verification === "archived") throw notFound();
   const snapshot = cleanSnapshot(input);
@@ -681,9 +691,15 @@ async function appendNodeVersion(
   return version;
 }
 
-export async function publishDraft(actor: Principal, draftId: string) {
+export async function publishDraft(
+  actor: Principal,
+  draftId: string,
+  expectedDraftVersion?: number,
+) {
   const row = await ownedDraft(actor, draftId);
-  authorize(actor, "knowledge.draft.publish", { spaceId: row.branch.spaceId!, kind: "write" });
+  const vaultAccess = await requireSpaceVaultAccess(actor, row.branch.spaceId, "write");
+  if (!vaultAccess)
+    authorize(actor, "knowledge.draft.publish", { spaceId: row.branch.spaceId!, kind: "write" });
   if (row.draft.state !== "editing")
     throw new ApiError(409, "draft_in_review", "The draft is currently in review.");
   if (row.node?.reviewRequired)
@@ -692,6 +708,20 @@ export async function publishDraft(actor: Principal, draftId: string) {
   assertDraftSnapshot(snapshot);
 
   return db.transaction(async (tx) => {
+    if (expectedDraftVersion !== undefined) {
+      const [current] = await tx
+        .select({ version: nodeDrafts.draftVersion })
+        .from(nodeDrafts)
+        .where(eq(nodeDrafts.id, draftId))
+        .for("update");
+      if (
+        !current ||
+        current.version !== expectedDraftVersion ||
+        current.version !== row.draft.draftVersion
+      )
+        throw versionConflict();
+      await requireVaultAccess(actor, row.draft.vaultId!, "write", tx);
+    }
     await assertUniqueWikiTitle(tx, row.branch.spaceId!, snapshot.title, row.draft.nodeId);
     if (!row.node) {
       const slug = await uniqueSlug(tx, row.branch.id, snapshot.title);
@@ -700,6 +730,7 @@ export async function publishDraft(actor: Principal, draftId: string) {
         .values({
           branchId: row.branch.id,
           projectId: row.draft.projectId,
+          vaultId: row.draft.vaultId,
           researchPurpose: row.draft.researchPurpose,
           title: snapshot.title,
           summary: snapshot.summary,
@@ -940,6 +971,7 @@ export async function discardDraft(actor: Principal, draftId: string) {
 
 export async function restoreNodeVersionToDraft(actor: Principal, nodeId: string, seq: number) {
   const official = await officialSnapshot(nodeId, "vi");
+  await requireSpaceVaultAccess(actor, official.branch.spaceId, "draft");
   authorize(actor, "knowledge.draft.write", { spaceId: official.branch.spaceId!, kind: "write" });
   if (official.node.verification === "archived") throw notFound();
   const [version] = await db
@@ -1035,6 +1067,7 @@ export async function setNodeProtection(actor: Principal, nodeId: string, review
     .innerJoin(branches, eq(branches.id, treeNodes.branchId))
     .where(eq(treeNodes.id, nodeId));
   if (!row || row.branch.scope !== "team" || !row.branch.spaceId) throw notFound();
+  await requireSpaceVaultAccess(actor, row.branch.spaceId, "write");
   authorize(actor, "knowledge.protect", { spaceId: row.branch.spaceId, kind: "write" });
   if (row.node.reviewRequired === reviewRequired) return row.node;
   return db.transaction(async (tx) => {
@@ -1061,6 +1094,7 @@ export async function setNodeProtection(actor: Principal, nodeId: string, review
 
 export async function getPendingDraftReviewsForNode(actor: Principal, nodeId: string) {
   const official = await officialSnapshot(nodeId, "vi");
+  await requireSpaceVaultAccess(actor, official.branch.spaceId, "read");
   authorize(actor, "knowledge.publish", { spaceId: official.branch.spaceId!, kind: "read" });
   const [changes, translations] = await Promise.all([
     db
@@ -1110,4 +1144,133 @@ export async function getPendingDraftReviewsForNode(actor: Principal, nodeId: st
       currentContentMd: english.snapshot.contentMd,
     })),
   ];
+}
+
+export async function createVaultNote(
+  actor: Principal,
+  input: { vaultId: string; title: string; contentMd?: string },
+) {
+  const snapshot = cleanSnapshot({
+    title: input.title,
+    contentMd: input.contentMd ?? "",
+    sortOrder: 0,
+    tags: [],
+    links: [],
+  });
+  assertDraftSnapshot(snapshot);
+  if (snapshot.title.length > 200)
+    throw new ApiError(400, "invalid_draft", "Draft title is too long.");
+  return db.transaction(async (tx) => {
+    await requireVaultAccess(actor, input.vaultId, "draft", tx);
+    // Serialize the single default branch without changing the Vault metadata version.
+    await tx
+      .select({ id: spaces.id })
+      .from(spaces)
+      .where(eq(spaces.id, input.vaultId))
+      .for("update");
+    let [branch] = await tx
+      .select()
+      .from(branches)
+      .where(
+        and(
+          eq(branches.spaceId, input.vaultId),
+          eq(branches.name, "Ghi chú"),
+          sql`${branches.archivedAt} IS NULL`,
+        ),
+      );
+    if (!branch)
+      [branch] = await tx
+        .insert(branches)
+        .values({ name: "Ghi chú", scope: "team", spaceId: input.vaultId, createdBy: actor.userId })
+        .returning();
+    const [draft] = await tx
+      .insert(nodeDrafts)
+      .values({
+        ...snapshot,
+        branchId: branch.id,
+        vaultId: input.vaultId,
+        projectId: null,
+        locale: "vi",
+        authorId: actor.userId,
+      })
+      .returning();
+    await recordAudit(tx, actor, {
+      accountability: "member",
+      action: "vault.note.draft.create",
+      targetType: "node_draft",
+      targetId: draft.id,
+      details: { vaultId: input.vaultId },
+    });
+    return draft;
+  });
+}
+export async function listVaultNotes(actor: Principal, vaultId: string) {
+  await requireVaultAccess(actor, vaultId, "read");
+  const notes = await db
+    .select({
+      id: treeNodes.id,
+      title: treeNodes.title,
+      version: treeNodes.version,
+      updatedAt: treeNodes.updatedAt,
+    })
+    .from(treeNodes)
+    .innerJoin(branches, eq(branches.id, treeNodes.branchId))
+    .where(
+      and(
+        eq(branches.spaceId, vaultId),
+        ne(treeNodes.verification, "archived"),
+        sql`${branches.archivedAt} IS NULL`,
+      ),
+    )
+    .orderBy(asc(treeNodes.title));
+  const drafts = await db
+    .select()
+    .from(nodeDrafts)
+    .where(and(eq(nodeDrafts.vaultId, vaultId), eq(nodeDrafts.authorId, actor.userId)))
+    .orderBy(desc(nodeDrafts.updatedAt));
+  return { notes, drafts };
+}
+export async function saveVaultDraft(
+  actor: Principal,
+  vaultId: string,
+  draftId: string,
+  input: { title: string; contentMd: string; expectedVersion: number },
+) {
+  await requireVaultAccess(actor, vaultId, "draft");
+  const row = await ownedDraft(actor, draftId);
+  if (row.draft.vaultId !== vaultId) throw notFound();
+  if (
+    typeof input.title !== "string" ||
+    input.title.trim().length > 200 ||
+    !Number.isInteger(input.expectedVersion) ||
+    input.expectedVersion < 1
+  )
+    throw new ApiError(400, "invalid_draft", "Invalid draft details.");
+  return updateDraft(actor, draftId, {
+    ...cleanSnapshot(row.draft),
+    title: input.title,
+    contentMd: input.contentMd,
+    expectedDraftVersion: input.expectedVersion,
+  });
+}
+export async function commitVaultDraft(
+  actor: Principal,
+  vaultId: string,
+  draftId: string,
+  expectedVersion: number,
+) {
+  await requireVaultAccess(actor, vaultId, "write");
+  const row = await ownedDraft(actor, draftId);
+  if (row.draft.vaultId !== vaultId) throw notFound();
+  if (!Number.isInteger(expectedVersion) || expectedVersion < 1)
+    throw new ApiError(400, "invalid_draft", "Invalid draft version.");
+  const result = await publishDraft(actor, draftId, expectedVersion);
+  const [version] = await db
+    .select({ id: treeNodeVersions.id })
+    .from(treeNodeVersions)
+    .where(
+      and(eq(treeNodeVersions.nodeId, result.nodeId), eq(treeNodeVersions.seq, result.version)),
+    );
+  if (!version) throw notFound();
+  return { noteId: result.nodeId, currentVersionId: version.id };
 }

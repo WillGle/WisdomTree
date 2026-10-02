@@ -1,3 +1,4 @@
+import { restrictVaultSpaceVisibility } from "../vault/access";
 import { and, asc, eq, inArray, ne } from "drizzle-orm";
 import { db } from "@/db";
 import { notFound } from "@/lib/errors";
@@ -73,7 +74,13 @@ export async function getAppResearchGraph(
         summary: treeNodes.summary,
       })
       .from(treeNodes)
-      .where(and(inArray(treeNodes.projectId, projectIds), ne(treeNodes.verification, "archived")))
+      .where(
+        and(
+          restrictVaultSpaceVisibility(actor, treeNodes.projectId),
+          inArray(treeNodes.projectId, projectIds),
+          ne(treeNodes.verification, "archived"),
+        ),
+      )
       .orderBy(asc(treeNodes.title), asc(treeNodes.id)),
     db
       .select({
@@ -83,7 +90,13 @@ export async function getAppResearchGraph(
         summary: sources.description,
       })
       .from(sources)
-      .where(and(inArray(sources.spaceId, projectIds), ne(sources.trustStatus, "archived")))
+      .where(
+        and(
+          restrictVaultSpaceVisibility(actor, sources.spaceId),
+          inArray(sources.spaceId, projectIds),
+          ne(sources.trustStatus, "archived"),
+        ),
+      )
       .orderBy(asc(sources.title), asc(sources.id)),
     db
       .select({
@@ -199,6 +212,7 @@ export async function getAppResearchGraph(
           .where(
             and(
               inArray(noteSupportSourceVersions.nodeId, noteIds),
+              restrictVaultSpaceVisibility(actor, sources.spaceId),
               inArray(sources.spaceId, projectIds),
             ),
           )
@@ -215,6 +229,7 @@ export async function getAppResearchGraph(
           .where(
             and(
               inArray(noteSupportNoteVersions.nodeId, noteIds),
+              restrictVaultSpaceVisibility(actor, treeNodes.projectId),
               inArray(treeNodes.projectId, projectIds),
             ),
           )

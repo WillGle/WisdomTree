@@ -13,3 +13,4 @@ export * from "../modules/project/schema";
 export * from "../modules/person/schema";
 export * from "../modules/activity/schema";
 export * from "../modules/publication/schema";
+export * from "../modules/vault/schema";

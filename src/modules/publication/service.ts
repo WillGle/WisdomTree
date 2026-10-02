@@ -1,3 +1,4 @@
+import { requireSpaceVaultAccess } from "../vault/access";
 import { and, desc, eq, isNull, sql } from "drizzle-orm";
 import { db, type Tx } from "@/db";
 import { ApiError, forbidden, notFound } from "@/lib/errors";
@@ -88,6 +89,7 @@ export async function publishNote(
     await requirePublish(actor, tx);
     await tx.execute(sql`SELECT pg_advisory_xact_lock(hashtextextended(${input.noteId}, 0))`);
     const { note, source } = await currentSource(tx, input.noteId);
+    await requireSpaceVaultAccess(actor, note.projectId, "write", tx);
     const [existing] = await tx
       .select()
       .from(notePublications)
@@ -208,6 +210,8 @@ export async function unpublishNote(actor: Principal, noteId: string) {
       .where(eq(notePublications.noteId, noteId))
       .for("update");
     if (!existing) throw notFound();
+    const { note } = await currentSource(tx, noteId);
+    await requireSpaceVaultAccess(actor, note.projectId, "write", tx);
     if (existing.unpublishedAt !== null) return { publication: existing, changed: false as const };
     const now = new Date();
     const [publication] = await tx
@@ -298,6 +302,7 @@ export async function getNotePublicationStatus(
   projectId: string,
   noteId: string,
 ): Promise<NotePublicationStatus> {
+  await requireSpaceVaultAccess(actor, projectId, "read");
   await requireProjectResearchRead(actor, projectId);
   const [note] = await db
     .select({ id: treeNodes.id })

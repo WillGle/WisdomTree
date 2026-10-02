@@ -1,3 +1,4 @@
+import { restrictVaultSpaceVisibility } from "../vault/access";
 import { and, asc, desc, eq, ne } from "drizzle-orm";
 import { db } from "@/db";
 import { ApiError, notFound, versionConflict } from "@/lib/errors";
@@ -299,7 +300,13 @@ export async function addActivityMaterial(
     .select({ id: sources.id })
     .from(sources)
     .innerJoin(projects, eq(projects.projectId, sources.spaceId))
-    .where(and(eq(sources.id, input.sourceId), eq(sources.spaceId, activity.projectId)));
+    .where(
+      and(
+        eq(sources.id, input.sourceId),
+        eq(sources.spaceId, activity.projectId),
+        restrictVaultSpaceVisibility(actor, sources.spaceId),
+      ),
+    );
   if (!source) throw new ApiError(400, "invalid_activity_material", "Invalid Project Material.");
   return addRelation(actor, activity, "material", source.id, async (tx) =>
     tx
@@ -344,7 +351,12 @@ export async function listActivityMaterials(actor: Principal, activityId: string
     })
     .from(activityMaterials)
     .innerJoin(sources, eq(sources.id, activityMaterials.sourceId))
-    .where(eq(activityMaterials.activityId, activity.id))
+    .where(
+      and(
+        eq(activityMaterials.activityId, activity.id),
+        restrictVaultSpaceVisibility(actor, sources.spaceId),
+      ),
+    )
     .orderBy(asc(sources.title), asc(sources.id));
 }
 
@@ -357,7 +369,13 @@ export async function addActivityNote(
     .select({ id: treeNodes.id })
     .from(treeNodes)
     .innerJoin(projects, eq(projects.projectId, treeNodes.projectId))
-    .where(and(eq(treeNodes.id, input.nodeId), eq(treeNodes.projectId, activity.projectId)));
+    .where(
+      and(
+        eq(treeNodes.id, input.nodeId),
+        eq(treeNodes.projectId, activity.projectId),
+        restrictVaultSpaceVisibility(actor, treeNodes.projectId),
+      ),
+    );
   if (!node) throw new ApiError(400, "invalid_activity_note", "Invalid Project Note.");
   return addRelation(actor, activity, "note", node.id, async (tx) =>
     tx
@@ -398,7 +416,12 @@ export async function listActivityNotes(actor: Principal, activityId: string) {
     })
     .from(activityNotes)
     .innerJoin(treeNodes, eq(treeNodes.id, activityNotes.nodeId))
-    .where(eq(activityNotes.activityId, activity.id))
+    .where(
+      and(
+        eq(activityNotes.activityId, activity.id),
+        restrictVaultSpaceVisibility(actor, treeNodes.projectId),
+      ),
+    )
     .orderBy(asc(treeNodes.title), asc(treeNodes.id));
 }
 

@@ -1,5 +1,5 @@
 import { createHash, randomUUID } from "node:crypto";
-import { and, asc, desc, eq, inArray, isNull, sql } from "drizzle-orm";
+import { and, asc, desc, eq, inArray, isNull, ne, sql } from "drizzle-orm";
 import { db, type Tx } from "@/db";
 import { ApiError, forbidden, notFound } from "@/lib/errors";
 import { signDownload } from "@/lib/sign";
@@ -22,6 +22,12 @@ import {
 import { promotions } from "../knowledge/schema";
 import { projects } from "../project/schema";
 import { users } from "../auth/schema";
+import {
+  requireSpaceVaultAccess,
+  restrictVaultSpaceVisibility,
+  requireVaultAccess,
+} from "../vault/access";
+import { vaults } from "../vault/schema";
 
 const MAX_SIZE_BYTES = 104_857_600; // 100 MB, intake-constraints.md
 /** Exported so the Library page's pager agrees with the query's LIMIT. */
@@ -45,7 +51,8 @@ type DigitalSourceInput = {
 };
 
 async function storeDigitalSource(actor: Principal, input: DigitalSourceInput, projectId?: string) {
-  authorize(actor, "storage.upload", { spaceId: input.spaceId, kind: "write" });
+  const vaultAccess = await requireSpaceVaultAccess(actor, input.spaceId, "write");
+  if (!vaultAccess) authorize(actor, "storage.upload", { spaceId: input.spaceId, kind: "write" });
 
   if (input.file.size > MAX_SIZE_BYTES) {
     throw new ApiError(413, "file_too_large", "File exceeds the 100 MB limit.");
@@ -118,20 +125,25 @@ async function requireConfirmedProject(actor: Principal, projectId: string | und
     .from(projects)
     .where(eq(projects.projectId, projectId));
   if (!project) throw notFound();
+  await requireSpaceVaultAccess(actor, project.projectId, "read");
   await requireProjectResearchRead(actor, project.projectId);
   return project;
 }
 
 /** Confirmed Project research uses Hybrid read; legacy Spaces keep old scoping. */
 async function requireMaterialResearchRead(actor: Principal, spaceId: string) {
+  const vaultAccess = await requireSpaceVaultAccess(actor, spaceId, "read");
+  if (vaultAccess) return;
   const [project] = await db
     .select({ projectId: projects.projectId })
     .from(projects)
     .where(eq(projects.projectId, spaceId));
   if (project) {
+    await requireSpaceVaultAccess(actor, project.projectId, "read");
     await requireProjectResearchRead(actor, project.projectId);
     return;
   }
+  await requireSpaceVaultAccess(actor, spaceId, "read");
   authorize(actor, "storage.library.browse", { spaceId, kind: "read" });
 }
 
@@ -147,6 +159,7 @@ export async function createProjectMaterial(
   },
 ) {
   const project = await requireConfirmedProject(actor, input.projectId);
+  await requireSpaceVaultAccess(actor, project.projectId, "write");
   authorize(actor, "storage.upload", { spaceId: project.projectId, kind: "write" });
   const title = input.title?.trim();
   if (!title) throw new ApiError(400, "invalid_material", "Material title is required.");
@@ -286,6 +299,7 @@ export async function listLibrary(
                  OR (${sources.currentVersionId} IS NULL
                      AND (${sourcePhysical.id} IS NOT NULL OR ${opts.includeMetadataOnly ?? false})))`,
         spaceFilter,
+        restrictVaultSpaceVisibility(actor, sources.spaceId),
         folderFilter,
         opts.categoryId ? eq(sources.categoryId, opts.categoryId) : undefined,
         textMatch,
@@ -394,6 +408,7 @@ export async function listSourceVersions(actor: Principal, sourceId: string) {
     .innerJoin(projects, eq(projects.projectId, sources.spaceId))
     .where(eq(sources.id, sourceId));
   if (!source) throw notFound();
+  await requireSpaceVaultAccess(actor, source.spaceId, "read");
   await requireProjectResearchRead(actor, source.spaceId);
 
   return db
@@ -421,11 +436,13 @@ export async function getDownloadToken(actor: Principal, sourceId: string) {
     .innerJoin(sourceVersions, eq(sources.currentVersionId, sourceVersions.id))
     .where(eq(sources.id, sourceId));
   if (!row || row.version.storageState !== "stored") throw notFound();
+  await requireSpaceVaultAccess(actor, row.spaceId, "read");
   const [project] = await db
     .select({ projectId: projects.projectId })
     .from(projects)
     .where(eq(projects.projectId, row.spaceId));
   if (project) {
+    await requireSpaceVaultAccess(actor, project.projectId, "read");
     await requireProjectResearchRead(actor, project.projectId);
   } else {
     authorize(actor, "storage.download", { spaceId: row.spaceId, kind: "read" });
@@ -452,11 +469,13 @@ export async function getSourceVersionDownloadToken(
     )
     .where(eq(sources.id, sourceId));
   if (!row || row.version.storageState !== "stored") throw notFound();
+  await requireSpaceVaultAccess(actor, row.spaceId, "read");
   const [project] = await db
     .select({ projectId: projects.projectId })
     .from(projects)
     .where(eq(projects.projectId, row.spaceId));
   if (project) {
+    await requireSpaceVaultAccess(actor, project.projectId, "read");
     await requireProjectResearchRead(actor, project.projectId);
   } else {
     authorize(actor, "storage.download", { spaceId: row.spaceId, kind: "read" });
@@ -482,6 +501,7 @@ async function loadOwnedSource(actor: Principal, sourceId: string, kind: "read" 
     .leftJoin(sourceVersions, eq(sources.currentVersionId, sourceVersions.id))
     .where(eq(sources.id, sourceId));
   if (!row) throw notFound();
+  await requireSpaceVaultAccess(actor, row.source.spaceId, kind);
   authorize(actor, "storage.source.manage", {
     ownerIds: [row.source.submittedBy, row.source.assignedTo],
     kind,
@@ -590,6 +610,7 @@ export async function restoreSource(actor: Principal, sourceId: string) {
     .innerJoin(sourceVersions, eq(sources.currentVersionId, sourceVersions.id))
     .where(eq(sources.id, sourceId));
   if (!row) throw notFound();
+  await requireSpaceVaultAccess(actor, row.source.spaceId, "write");
   if (row.version.storageState !== "archived") {
     throw new ApiError(409, "not_archived", "This item is not withdrawn.");
   }
@@ -667,6 +688,7 @@ async function addStoredSourceVersion(
     : [];
   if (projectId && !projectMaterial) throw notFound();
   const row = projectMaterial ?? (await loadOwnedSource(actor, sourceId, "write"));
+  await requireSpaceVaultAccess(actor, row.source.spaceId, "write");
   if (row.version && row.version.storageState !== "stored") {
     throw new ApiError(409, "not_stored", "New versions can only be added to a stored item.");
   }
@@ -746,6 +768,7 @@ export async function addProjectMaterialVersion(
   if (!input.sourceId || !input.file) {
     throw new ApiError(400, "invalid_material_version", "Material and file are required.");
   }
+  await requireSpaceVaultAccess(actor, project.projectId, "write");
   authorize(actor, "storage.upload", { spaceId: project.projectId, kind: "write" });
   const [source] = await db
     .select({ id: sources.id })
@@ -762,7 +785,12 @@ export async function addProjectMaterialVersion(
 }
 
 /** Shared Project/Material assertion for representation-specific boundaries. */
-export async function requireProjectMaterial(projectId: string, sourceId: string) {
+export async function requireProjectMaterial(
+  actor: Principal,
+  projectId: string,
+  sourceId: string,
+) {
+  await requireSpaceVaultAccess(actor, projectId, "read");
   const [project] = await db
     .select({ projectId: projects.projectId })
     .from(projects)
@@ -790,7 +818,12 @@ export async function mySubmissions(actor: Principal) {
     })
     .from(sources)
     .leftJoin(sourceVersions, eq(sources.currentVersionId, sourceVersions.id))
-    .where(eq(sources.submittedBy, actor.userId));
+    .where(
+      and(
+        eq(sources.submittedBy, actor.userId),
+        restrictVaultSpaceVisibility(actor, sources.spaceId),
+      ),
+    );
   return sourceRows
     .map((r) => ({ itemType: "source" as const, ...r }))
     .sort(
@@ -844,7 +877,10 @@ export async function listMemberSpaces(actor: Principal) {
     .select({ id: spaces.id, name: spaces.name, type: spaces.type })
     .from(spaces)
     .where(
-      visible !== null ? (visible.length ? inArray(spaces.id, visible) : sql`false`) : undefined,
+      and(
+        restrictVaultSpaceVisibility(actor, spaces.id),
+        visible !== null ? (visible.length ? inArray(spaces.id, visible) : sql`false`) : undefined,
+      ),
     )
     .orderBy(spaces.name);
   return rows;
@@ -857,6 +893,7 @@ export async function listMemberSpaces(actor: Principal) {
 
 /** Members of one space, with names — the admin membership panel's read. */
 export async function listSpaceMembers(actor: Principal, spaceId: string) {
+  await requireSpaceVaultAccess(actor, spaceId, "manage");
   authorize(actor, "storage.space.members.manage", { spaceId, kind: "read" });
   return db
     .select({
@@ -917,6 +954,7 @@ export async function addSpaceMember(
   userId: string,
   memberRole: "viewer" | "contributor" | "manager" = "contributor",
 ) {
+  await requireSpaceVaultAccess(actor, spaceId, "manage");
   authorize(actor, "storage.space.members.manage", { spaceId, kind: "write" });
   await requireSharedProjectMembershipManagement(spaceId);
   const [space] = await db.select({ id: spaces.id }).from(spaces).where(eq(spaces.id, spaceId));
@@ -944,6 +982,7 @@ export async function addSpaceMember(
 }
 
 export async function removeSpaceMember(actor: Principal, spaceId: string, userId: string) {
+  await requireSpaceVaultAccess(actor, spaceId, "manage");
   authorize(actor, "storage.space.members.manage", { spaceId, kind: "write" });
   await requireSharedProjectMembershipManagement(spaceId);
   await db.transaction(async (tx) => {
@@ -967,6 +1006,7 @@ export async function setSpaceMemberRole(
   userId: string,
   memberRole: "viewer" | "contributor" | "manager",
 ) {
+  await requireSpaceVaultAccess(actor, spaceId, "manage");
   authorize(actor, "storage.space.members.manage", { spaceId, kind: "write" });
   await requireSharedProjectMembershipManagement(spaceId);
   await db.transaction(async (tx) => {
@@ -1002,6 +1042,7 @@ function rethrowFolderNameTaken(err: unknown): never {
 
 /** Flat rows for one space; the page builds the tree/breadcrumb itself. */
 export async function listFolders(actor: Principal, spaceId: string) {
+  await requireSpaceVaultAccess(actor, spaceId, "read");
   authorize(actor, "storage.library.browse", { spaceId, kind: "read" });
   return db
     .select({ id: folders.id, parentId: folders.parentId, name: folders.name })
@@ -1018,7 +1059,8 @@ export async function createFolder(
   actor: Principal,
   input: { spaceId: string; parentId?: string | null; name: string },
 ) {
-  authorize(actor, "storage.upload", { spaceId: input.spaceId, kind: "write" });
+  const vaultAccess = await requireSpaceVaultAccess(actor, input.spaceId, "write");
+  if (!vaultAccess) authorize(actor, "storage.upload", { spaceId: input.spaceId, kind: "write" });
   const name = input.name?.trim();
   if (!name) throw new ApiError(400, "invalid_folder", "Folder name must not be empty.");
   const parentId = input.parentId || null;
@@ -1055,6 +1097,7 @@ export async function createFolder(
 async function loadOwnedFolder(actor: Principal, folderId: string) {
   const [folder] = await db.select().from(folders).where(eq(folders.id, folderId));
   if (!folder) throw notFound();
+  await requireSpaceVaultAccess(actor, folder.spaceId, "write");
   authorize(actor, "storage.source.manage", { ownerIds: [folder.createdBy], kind: "write" });
   return folder;
 }
@@ -1127,10 +1170,81 @@ export async function listAllMembers(actor: Principal) {
  * stays separate from research People and does not grant user administration.
  */
 export async function listSpaceMemberCandidates(actor: Principal, spaceId: string) {
+  await requireSpaceVaultAccess(actor, spaceId, "manage");
   authorize(actor, "storage.space.members.manage", { spaceId, kind: "read" });
   return db
     .select({ id: users.id, displayName: users.displayName, role: users.role })
     .from(users)
     .where(isNull(users.disabledAt))
     .orderBy(asc(users.displayName));
+}
+
+/** Delivery rechecks durable membership for immutable Vault object URLs. */
+export async function getDownloadAccessContext(
+  objectKey: string,
+): Promise<{ vaultId: string } | null> {
+  const [row] = await db
+    .select({ vaultId: vaults.id })
+    .from(sourceVersions)
+    .innerJoin(sources, eq(sources.id, sourceVersions.sourceId))
+    .innerJoin(vaults, eq(vaults.id, sources.spaceId))
+    .where(eq(sourceVersions.originalObjectKey, objectKey));
+  return row ?? null;
+}
+
+export async function uploadVaultResource(
+  actor: Principal,
+  input: { vaultId: string; title: string; file: File },
+) {
+  await requireVaultAccess(actor, input.vaultId, "write");
+  if (
+    typeof input.title !== "string" ||
+    !input.title.trim() ||
+    input.title.trim().length > 200 ||
+    input.file.size === 0
+  )
+    throw new ApiError(400, "invalid_input", "Title and non-empty file are required.");
+  const result = await storeDigitalSource(actor, {
+    spaceId: input.vaultId,
+    title: input.title.trim(),
+    file: input.file,
+  });
+  return {
+    id: result.id,
+    title: result.title,
+    vaultId: input.vaultId,
+    currentVersionId: result.currentVersion?.id ?? null,
+  };
+}
+export async function listVaultResources(actor: Principal, vaultId: string) {
+  await requireVaultAccess(actor, vaultId, "read");
+  return db
+    .select({
+      id: sources.id,
+      title: sources.title,
+      currentVersionId: sources.currentVersionId,
+      mimeType: sourceVersions.mimeType,
+    })
+    .from(sources)
+    .leftJoin(sourceVersions, eq(sourceVersions.id, sources.currentVersionId))
+    .where(and(eq(sources.spaceId, vaultId), ne(sources.trustStatus, "archived")))
+    .orderBy(asc(sources.title));
+}
+export async function getVaultResourceDownloadToken(
+  actor: Principal,
+  vaultId: string,
+  resourceId: string,
+  versionId: string,
+) {
+  await requireVaultAccess(actor, vaultId, "read");
+  const [row] = await db
+    .select({ version: sourceVersions })
+    .from(sources)
+    .innerJoin(
+      sourceVersions,
+      and(eq(sourceVersions.sourceId, sources.id), eq(sourceVersions.id, versionId)),
+    )
+    .where(and(eq(sources.id, resourceId), eq(sources.spaceId, vaultId)));
+  if (!row || row.version.storageState !== "stored") throw notFound();
+  return signDownload(row.version.originalObjectKey, row.version.originalFilename);
 }

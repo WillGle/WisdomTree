@@ -16,6 +16,7 @@ import {
 import { users } from "../auth/schema";
 import { projects } from "../project/schema";
 import { sourceVersions, spaces } from "../storage/schema";
+import { vaults } from "../vault/schema";
 
 // Module: knowledge — branches, tree nodes, versions, links, tags,
 // proposals and promotions.
@@ -70,6 +71,7 @@ export const treeNodes = pgTable(
       .references(() => branches.id),
     /** NULL is reserved for demo/legacy compatibility during Project migration. */
     projectId: uuid("project_id").references(() => projects.projectId, { onDelete: "restrict" }),
+    vaultId: uuid("vault_id").references(() => vaults.id, { onDelete: "restrict" }),
     researchPurpose: text("research_purpose", { enum: ["evidence", "synthesis"] }),
     title: text("title").notNull(),
     summary: text("summary"),
@@ -244,6 +246,7 @@ export const nodeDrafts = pgTable(
       .references(() => branches.id, { onDelete: "cascade" }),
     /** Project context while the author's working copy is still private. */
     projectId: uuid("project_id").references(() => projects.projectId, { onDelete: "restrict" }),
+    vaultId: uuid("vault_id").references(() => vaults.id, { onDelete: "restrict" }),
     researchPurpose: text("research_purpose", { enum: ["evidence", "synthesis"] }),
     locale: text("locale", { enum: ["vi", "en"] })
       .notNull()

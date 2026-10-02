@@ -9,6 +9,7 @@ import { recordAudit } from "../audit/service";
 import { users } from "../auth/schema";
 import { projects } from "../project/schema";
 import { sources, sourceVersions, spaces } from "../storage/schema";
+import { requireSpaceVaultAccess, restrictVaultSpaceVisibility } from "../vault/access";
 import {
   branches,
   nodeProposals,
@@ -43,6 +44,7 @@ export function branchVisibilityCondition(actor: Principal) {
         ? and(eq(branches.scope, "team"), inArray(branches.spaceId, visibleSpaces))
         : sql`false`;
   return and(
+    restrictVaultSpaceVisibility(actor, branches.spaceId),
     sql`${branches.archivedAt} IS NULL`,
     or(visibleTeam, eq(branches.ownerUserId, actor.userId)),
   );
@@ -159,6 +161,7 @@ export async function createBranch(
     if (!input.spaceId) {
       throw new ApiError(400, "space_required", "A team branch requires a space.");
     }
+    await requireSpaceVaultAccess(actor, input.spaceId, "manage");
     authorize(actor, "knowledge.branch.manage", { spaceId: input.spaceId, kind: "write" });
   }
   await assertValidBranchParent({
@@ -235,6 +238,7 @@ export async function updateBranch(
       kind: "write",
     });
   } else {
+    await requireSpaceVaultAccess(actor, branch.spaceId, "manage");
     authorize(actor, "knowledge.branch.manage", { spaceId: branch.spaceId!, kind: "write" });
   }
   if (patch.parentId !== undefined) {
@@ -533,6 +537,7 @@ export async function getNode(actor: Principal, nodeId: string) {
       .where(
         and(
           eq(treeNodeVersions.nodeId, nodeId),
+          restrictVaultSpaceVisibility(actor, sources.spaceId),
           visibleSpaces === null
             ? undefined
             : visibleSpaces.length
@@ -707,6 +712,7 @@ export async function listProjectNoteVersions(actor: Principal, nodeId: string) 
     .innerJoin(projects, eq(projects.projectId, treeNodes.projectId))
     .where(and(eq(treeNodes.id, nodeId), ne(treeNodes.verification, "archived")));
   if (!node || !node.projectId) throw notFound();
+  await requireSpaceVaultAccess(actor, node.projectId, "read");
   await requireProjectResearchRead(actor, node.projectId);
 
   return db
@@ -773,6 +779,7 @@ export async function getNodeChangeProposal(actor: Principal, proposalId: string
     .innerJoin(users, eq(users.id, nodeProposals.createdBy))
     .where(and(eq(nodeProposals.kind, "change"), eq(nodeProposals.id, proposalId)));
   if (!row) throw notFound();
+  await requireSpaceVaultAccess(actor, row.spaceId, "read");
   authorize(actor, "knowledge.publish", { spaceId: row.spaceId ?? undefined, kind: "read" });
   return {
     ...row,

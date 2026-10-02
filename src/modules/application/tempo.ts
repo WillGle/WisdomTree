@@ -81,7 +81,7 @@ export async function requestAppProjectLibraryLoan(
   input: { projectId: string; materialId: string },
 ) {
   await getProject(actor, input.projectId);
-  const material = await requireProjectMaterial(input.projectId, input.materialId);
+  const material = await requireProjectMaterial(actor, input.projectId, input.materialId);
   if (material.id !== input.materialId) throw notFound();
   const ticket = await requestProjectMaterialLoan(actor, input.materialId);
   return { ...transitionDto(ticket), materialId: input.materialId };
@@ -173,7 +173,7 @@ function physicalDto(physical: {
 
 async function requireAppProjectPhysical(actor: Principal, projectId: string, materialId: string) {
   await getProject(actor, projectId);
-  const material = await requireProjectMaterial(projectId, materialId);
+  const material = await requireProjectMaterial(actor, projectId, materialId);
   if (material.id !== materialId) throw notFound();
   return material;
 }

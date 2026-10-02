@@ -1,3 +1,4 @@
+import { restrictVaultSpaceVisibility } from "../vault/access";
 import { and, asc, desc, eq, inArray, isNull, ne, sql } from "drizzle-orm";
 import { db } from "@/db";
 import { ApiError } from "@/lib/errors";
@@ -176,6 +177,7 @@ export async function searchInternalResearch(
           .innerJoin(spaces, eq(spaces.id, projects.projectId))
           .where(
             and(
+              restrictVaultSpaceVisibility(actor, treeNodes.projectId),
               inArray(treeNodes.projectId, projectIds),
               ne(treeNodes.verification, "archived"),
               sql`${noteVector} @@ ${tsQuery}`,
@@ -208,6 +210,7 @@ export async function searchInternalResearch(
           .innerJoin(spaces, eq(spaces.id, projects.projectId))
           .where(
             and(
+              restrictVaultSpaceVisibility(actor, sources.spaceId),
               inArray(sources.spaceId, projectIds),
               ne(sources.trustStatus, "archived"),
               sql`(

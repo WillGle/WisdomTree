@@ -1,3 +1,4 @@
+import { requireSpaceVaultAccess } from "../vault/access";
 import { and, asc, eq, inArray } from "drizzle-orm";
 import { db } from "@/db";
 import { notFound } from "@/lib/errors";
@@ -81,6 +82,7 @@ export async function getNoteResearchProvenance(actor: Principal, noteVersionId:
     .innerJoin(spaces, eq(spaces.id, projects.projectId))
     .where(eq(treeNodeVersions.id, noteVersionId));
   if (!target) throw notFound();
+  await requireSpaceVaultAccess(actor, target.projectId, "read");
   await requireProjectResearchRead(actor, target.projectId);
 
   const support = await listNoteVersionSupportingResearch(actor, noteVersionId);
