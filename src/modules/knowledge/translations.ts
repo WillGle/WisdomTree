@@ -1,3 +1,4 @@
+import { requireSpaceVaultAccess } from "../vault/access";
 import { and, asc, eq, inArray, sql } from "drizzle-orm";
 import { db } from "@/db";
 import { ApiError, notFound, versionConflict } from "@/lib/errors";
@@ -72,6 +73,7 @@ export async function saveNodeTranslation(
     throw versionConflict();
 
   if (row.branch.scope === "team") {
+    await requireSpaceVaultAccess(actor, row.branch.spaceId, "draft");
     authorize(actor, "knowledge.node.edit", { spaceId: row.branch.spaceId!, kind: "write" });
     const [pending] = await db
       .select({ id: nodeTranslationProposals.id })
@@ -188,7 +190,11 @@ export async function listPendingTranslations(actor: Principal) {
     .orderBy(asc(nodeTranslationProposals.createdAt));
 }
 
-export async function getTranslationProposal(actor: Principal, proposalId: string) {
+export async function getTranslationProposal(
+  actor: Principal,
+  proposalId: string,
+  action: "read" | "write" = "read",
+) {
   authorize(actor, "knowledge.review.list", { kind: "read" });
   const [row] = await db
     .select({
@@ -201,6 +207,7 @@ export async function getTranslationProposal(actor: Principal, proposalId: strin
     .innerJoin(branches, eq(branches.id, treeNodes.branchId))
     .where(eq(nodeTranslationProposals.id, proposalId));
   if (!row) throw notFound();
+  await requireSpaceVaultAccess(actor, row.spaceId, action);
   authorize(actor, "knowledge.publish", { spaceId: row.spaceId!, kind: "read" });
   return row;
 }
@@ -210,7 +217,7 @@ export async function reviewTranslationProposal(
   proposalId: string,
   input: { decision: "approved" | "rejected" | "changes_requested"; note?: string },
 ) {
-  const row = await getTranslationProposal(actor, proposalId);
+  const row = await getTranslationProposal(actor, proposalId, "write");
   authorize(actor, "knowledge.publish", { spaceId: row.spaceId!, kind: "write" });
   assertIndependentReviewer(actor.userId, { submittedBy: row.proposal.createdBy });
   if (row.proposal.state !== "pending") throw notFound();

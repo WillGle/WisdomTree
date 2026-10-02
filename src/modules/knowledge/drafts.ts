@@ -1226,7 +1226,13 @@ export async function listVaultNotes(actor: Principal, vaultId: string) {
   const drafts = await db
     .select()
     .from(nodeDrafts)
-    .where(and(eq(nodeDrafts.vaultId, vaultId), eq(nodeDrafts.authorId, actor.userId)))
+    .where(
+      and(
+        eq(nodeDrafts.vaultId, vaultId),
+        eq(nodeDrafts.authorId, actor.userId),
+        eq(nodeDrafts.locale, "vi"),
+      ),
+    )
     .orderBy(desc(nodeDrafts.updatedAt));
   return { notes, drafts };
 }
@@ -1238,7 +1244,7 @@ export async function saveVaultDraft(
 ) {
   await requireVaultAccess(actor, vaultId, "draft");
   const row = await ownedDraft(actor, draftId);
-  if (row.draft.vaultId !== vaultId) throw notFound();
+  if (row.draft.vaultId !== vaultId || row.draft.locale !== "vi") throw notFound();
   if (
     typeof input.title !== "string" ||
     input.title.trim().length > 200 ||
@@ -1261,7 +1267,7 @@ export async function commitVaultDraft(
 ) {
   await requireVaultAccess(actor, vaultId, "write");
   const row = await ownedDraft(actor, draftId);
-  if (row.draft.vaultId !== vaultId) throw notFound();
+  if (row.draft.vaultId !== vaultId || row.draft.locale !== "vi") throw notFound();
   if (!Number.isInteger(expectedVersion) || expectedVersion < 1)
     throw new ApiError(400, "invalid_draft", "Invalid draft version.");
   const result = await publishDraft(actor, draftId, expectedVersion);

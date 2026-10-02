@@ -1,3 +1,4 @@
+import { restrictVaultSpaceVisibility } from "../vault/access";
 import { randomBytes } from "node:crypto";
 import { and, asc, desc, eq, inArray, isNull, ne, sql } from "drizzle-orm";
 import { db, type Tx } from "@/db";
@@ -10,7 +11,7 @@ import { users } from "../auth/schema";
 import { activities } from "../activity/schema";
 import { projects } from "../project/schema";
 import { sources, spaceMembers, spaces } from "../storage/schema";
-import { treeNodes } from "../knowledge/schema";
+import { branches, treeNodes } from "../knowledge/schema";
 import { calendarTokens, deadlineLinks, deadlines, tasks, taskStatusHistory } from "./schema";
 
 // Module: pm — deadlines with reminder offsets and links, the operational
@@ -153,7 +154,7 @@ async function replaceLinks(
  * in the page because it carries the space rule: `source` is the one
  * space-scoped target, so it is filtered to the deadline's own space. Tasks and
  * tree nodes are global by design (pm.board.read / knowledge.node.read carry no
- * space scope) and need no predicate.
+ * space scope). Vault-owned content additionally requires current Vault access.
  *
  * Writes are validated by assertLinksVisibleFrom; this is the matching read.
  */
@@ -169,9 +170,27 @@ export async function getDeadlineLinks(actor: Principal, deadlineId: string) {
       ? db
           .select()
           .from(sources)
-          .where(and(inArray(sources.id, sourceIds), eq(sources.spaceId, deadline.spaceId)))
+          .where(
+            and(
+              inArray(sources.id, sourceIds),
+              eq(sources.spaceId, deadline.spaceId),
+              restrictVaultSpaceVisibility(actor, sources.spaceId),
+            ),
+          )
       : [],
-    nodeIds.length ? db.select().from(treeNodes).where(inArray(treeNodes.id, nodeIds)) : [],
+    nodeIds.length
+      ? db
+          .select({ node: treeNodes })
+          .from(treeNodes)
+          .innerJoin(branches, eq(branches.id, treeNodes.branchId))
+          .where(
+            and(
+              inArray(treeNodes.id, nodeIds),
+              restrictVaultSpaceVisibility(actor, branches.spaceId),
+            ),
+          )
+          .then((rows) => rows.map((row) => row.node))
+      : [],
   ]);
   return { deadline, linkedTasks, linkedSources, linkedNodes };
 }

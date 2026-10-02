@@ -379,7 +379,10 @@ export async function searchKnowledge(actor: Principal, q: string, spaceId?: str
   authorize(actor, "knowledge.search", { kind: "read" });
   const query = q.trim();
   if (!query) return [];
-  if (spaceId) authorize(actor, "knowledge.space.read", { spaceId, kind: "read" });
+  if (spaceId) {
+    await requireSpaceVaultAccess(actor, spaceId, "read");
+    authorize(actor, "knowledge.space.read", { spaceId, kind: "read" });
+  }
   const visibleSpaces = scopedToSpaces(actor);
   const sourceScope = spaceId
     ? eq(sources.spaceId, spaceId)
@@ -388,7 +391,9 @@ export async function searchKnowledge(actor: Principal, q: string, spaceId?: str
       : visibleSpaces.length
         ? inArray(sources.spaceId, visibleSpaces)
         : sql`false`;
-  const nodeScope = spaceId ? eq(branches.spaceId, spaceId) : branchVisibilityCondition(actor);
+  const nodeScope = spaceId
+    ? and(eq(branches.spaceId, spaceId), restrictVaultSpaceVisibility(actor, branches.spaceId))
+    : branchVisibilityCondition(actor);
   const [nodes, translatedNodes, sourceRows] = await Promise.all([
     db
       .select({
@@ -451,6 +456,7 @@ export async function searchKnowledge(actor: Principal, q: string, spaceId?: str
       .where(
         and(
           ne(sources.trustStatus, "archived"),
+          restrictVaultSpaceVisibility(actor, sources.spaceId),
           sourceScope,
           or(ilike(sources.title, `%${query}%`), ilike(sources.description, `%${query}%`)),
         ),
@@ -655,7 +661,13 @@ export async function wikiIndex(actor: Principal) {
   const sourceRows = await db
     .select({ id: sources.id, title: sources.title })
     .from(sources)
-    .where(and(ne(sources.trustStatus, "archived"), spaceFilter));
+    .where(
+      and(
+        ne(sources.trustStatus, "archived"),
+        restrictVaultSpaceVisibility(actor, sources.spaceId),
+        spaceFilter,
+      ),
+    );
 
   for (const s of sourceRows) {
     const key = normalizeTitle(s.title);

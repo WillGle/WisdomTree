@@ -1,3 +1,4 @@
+import { vaults } from "../vault/schema";
 import { and, asc, eq, inArray, sql } from "drizzle-orm";
 import { db } from "@/db";
 import { ApiError, forbidden, notFound, versionConflict } from "@/lib/errors";
@@ -251,16 +252,18 @@ export async function getProjectApplicationAccess(actor: Principal, projectId: s
     .select({ role: spaceMembers.memberRole })
     .from(spaceMembers)
     .where(and(eq(spaceMembers.spaceId, projectId), eq(spaceMembers.userId, actor.userId)));
-  const [libraryCirculation, libraryOperator, canPublish] = await Promise.all([
+  const [libraryCirculation, libraryOperator, canPublish, vaultRows] = await Promise.all([
     hasProjectCapability(projectId, "library_circulation"),
     hasProjectLibraryOperator(actor, projectId),
     hasTmktCoreCapability(actor, "tmkt.publish"),
+    db.select({ ownerUserId: vaults.ownerUserId }).from(vaults).where(eq(vaults.id, projectId)),
   ]);
   return projectApplicationAccess(
     membership?.role,
     libraryCirculation,
     libraryOperator,
     canPublish,
+    vaultRows[0] ? vaultRows[0].ownerUserId === actor.userId : undefined,
   );
 }
 
@@ -269,6 +272,7 @@ function projectApplicationAccess(
   libraryCirculation: boolean,
   libraryOperator: boolean,
   canPublish: boolean,
+  vaultOwner?: boolean,
 ) {
   const operationalMember = Boolean(membershipRole);
   const contributor = membershipRole === "contributor" || membershipRole === "manager";
@@ -280,13 +284,14 @@ function projectApplicationAccess(
     capabilities: {
       canEditProject: manager,
       canCreateNote: contributor,
-      canCreateMaterial: contributor,
+      canCreateMaterial: contributor && vaultOwner !== false,
       canCreateActivity: contributor,
       canCreateTask: contributor,
       canManagePeople: contributor,
-      canPublish,
+      canPublish: canPublish && vaultOwner !== false,
       canManageLibraryOperators: manager && libraryCirculation,
-      isLibraryOperator: operationalMember && libraryCirculation && libraryOperator,
+      isLibraryOperator:
+        operationalMember && libraryCirculation && libraryOperator && vaultOwner !== false,
     },
   };
 }
@@ -294,7 +299,7 @@ function projectApplicationAccess(
 /** Batch access facts for an already research-authorized Project list. */
 export async function listProjectApplicationAccess(actor: Principal, projectIds: string[]) {
   if (!projectIds.length) return new Map<string, ReturnType<typeof projectApplicationAccess>>();
-  const [memberships, capabilities, operators, canPublish] = await Promise.all([
+  const [memberships, capabilities, operators, canPublish, vaultRows] = await Promise.all([
     db
       .select({ projectId: spaceMembers.spaceId, role: spaceMembers.memberRole })
       .from(spaceMembers)
@@ -318,7 +323,12 @@ export async function listProjectApplicationAccess(actor: Principal, projectIds:
         ),
       ),
     hasTmktCoreCapability(actor, "tmkt.publish"),
+    db
+      .select({ id: vaults.id, ownerUserId: vaults.ownerUserId })
+      .from(vaults)
+      .where(inArray(vaults.id, projectIds)),
   ]);
+  const vaultOwners = new Map(vaultRows.map((row) => [row.id, row.ownerUserId]));
   const membershipByProject = new Map(memberships.map((row) => [row.projectId, row.role]));
   const libraryProjects = new Set(capabilities.map((row) => row.projectId));
   const operatorProjects = new Set(operators.map((row) => row.projectId));
@@ -330,6 +340,7 @@ export async function listProjectApplicationAccess(actor: Principal, projectIds:
         libraryProjects.has(projectId),
         operatorProjects.has(projectId),
         canPublish,
+        vaultOwners.has(projectId) ? vaultOwners.get(projectId) === actor.userId : undefined,
       ),
     ]),
   );

@@ -1,3 +1,4 @@
+import { requireSpaceVaultAccess } from "../vault/access";
 import { notFound } from "@/lib/errors";
 import type { Principal } from "../auth/principal";
 import type { ExtractionMethod } from "../storage/extraction";
@@ -78,6 +79,7 @@ export async function getAppProjectMaterial(
     getSourceDetail(actor, materialId),
   ]);
   if (material.spaceId !== project.id) throw notFound();
+  const vaultAccess = await requireSpaceVaultAccess(actor, material.spaceId, "read");
   const [lineageNotes, workingDrafts] = await Promise.all([
     listProjectMaterialLineageNotes(actor, {
       projectId: project.id,
@@ -121,7 +123,9 @@ export async function getAppProjectMaterial(
     lineageNotes,
     workingDrafts,
     capabilities: {
-      canSteward: material.submittedBy === actor.userId || material.assignedTo === actor.userId,
+      canSteward:
+        (!vaultAccess || vaultAccess.role === "owner") &&
+        (material.submittedBy === actor.userId || material.assignedTo === actor.userId),
     },
   };
 }

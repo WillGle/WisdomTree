@@ -1,4 +1,4 @@
-import { requireSpaceVaultAccess } from "../vault/access";
+import { requireSpaceVaultAccess, restrictVaultSpaceVisibility } from "../vault/access";
 import { and, asc, eq, inArray, sql } from "drizzle-orm";
 import { db, type Tx } from "@/db";
 import { ApiError, notFound, versionConflict } from "@/lib/errors";
@@ -64,6 +64,10 @@ export async function listPublicationTargets(actor: Principal) {
     .where(
       and(
         eq(branches.scope, "team"),
+        restrictVaultSpaceVisibility(actor, branches.spaceId),
+        sql`(NOT EXISTS (SELECT 1 FROM vaults WHERE id = ${branches.spaceId})
+          OR EXISTS (SELECT 1 FROM space_members WHERE space_id = ${branches.spaceId}
+            AND user_id = ${actor.userId} AND member_role IN ('contributor', 'manager')))`,
         sql`${branches.archivedAt} IS NULL`,
         actor.role === "admin_op"
           ? undefined
