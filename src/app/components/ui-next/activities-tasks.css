@@ -71,12 +71,12 @@
     border-color 150ms ease;
 }
 .ui-next-work-list__link:hover,
-.ui-next-task-list__row:not(.ui-next-task-list__row--readonly):hover {
+.ui-next-task-list__row:hover {
   background: var(--ui-color-surface-sunken);
   border-color: var(--ui-color-border-strong);
 }
 .ui-next-task-list__row--readonly {
-  cursor: default;
+  cursor: pointer;
 }
 .ui-next-work-list h3,
 .ui-next-task-list strong {

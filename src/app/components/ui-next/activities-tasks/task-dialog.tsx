@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useId, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { UiLocale } from "@/modules/auth/profile";
 import { Dialog } from "../overlays/dialog";
@@ -79,12 +79,14 @@ export interface UnifiedTaskDialogProps {
   onUpdated?: (task: TaskItem) => void;
 }
 
+const emptyProjects: ProjectOption[] = [];
+
 export function UnifiedTaskDialog({
   open,
   onClose,
   locale,
   task,
-  projects = [],
+  projects = emptyProjects,
   currentProjectId,
   defaultProjectId,
   activities: initialActivities,
@@ -100,18 +102,16 @@ export function UnifiedTaskDialog({
   const formId = `task-form-${rawFormId.replace(/[^a-zA-Z0-9_-]/g, "_")}`;
 
   const initialProjectId =
-    task?.projectId ||
-    currentProjectId ||
-    defaultProjectId ||
-    projects[0]?.id ||
-    "";
+    task?.projectId || currentProjectId || defaultProjectId || projects[0]?.id || "";
 
   const [selectedProjectId, setSelectedProjectId] = useState(initialProjectId);
   const [activities, setActivities] = useState<ActivityOption[]>(initialActivities || []);
   const [assignees, setAssignees] = useState<AssigneeOption[]>(initialAssignees || []);
   const [title, setTitle] = useState(task?.title || "");
   const [state, setState] = useState<TaskItem["state"]>(task?.state || "todo");
-  const [priority, setPriority] = useState<NonNullable<TaskItem["priority"]>>(task?.priority || "medium");
+  const [priority, setPriority] = useState<NonNullable<TaskItem["priority"]>>(
+    task?.priority || "medium",
+  );
   const [kind, setKind] = useState<NonNullable<TaskItem["kind"]>>(task?.kind || "task");
   const [sprint, setSprint] = useState(task?.sprint || "");
   const [estimatePoints, setEstimatePoints] = useState(
@@ -128,15 +128,20 @@ export function UnifiedTaskDialog({
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const initializedTask = useRef<string | null>(null);
+  const readOnly = task?.canEdit === false;
+
   // Sync state when task or open status changes
   useEffect(() => {
+    if (!open) {
+      initializedTask.current = null;
+      return;
+    }
+    const taskKey = task?.id ?? "new";
+    if (initializedTask.current === taskKey) return;
+    initializedTask.current = taskKey;
     if (open) {
-      const pid =
-        task?.projectId ||
-        currentProjectId ||
-        defaultProjectId ||
-        projects[0]?.id ||
-        "";
+      const pid = task?.projectId || currentProjectId || defaultProjectId || projects[0]?.id || "";
       setSelectedProjectId(pid);
       setTitle(task?.title || "");
       setState(task?.state || "todo");
@@ -197,8 +202,30 @@ export function UnifiedTaskDialog({
     };
   }, [selectedProjectId, currentProjectId, initialActivities, initialAssignees]);
 
+  const hasChanges =
+    !readOnly &&
+    (selectedProjectId !== initialProjectId ||
+      title !== (task?.title || "") ||
+      state !== (task?.state || "todo") ||
+      priority !== (task?.priority || "medium") ||
+      kind !== (task?.kind || "task") ||
+      sprint !== (task?.sprint || "") ||
+      estimatePoints !== (task?.estimatePoints != null ? String(task.estimatePoints) : "") ||
+      assigneeId !== (task?.assignedTo || "") ||
+      activityId !== (task?.activityId || "") ||
+      dueAt !== toLocalDateTime(task?.dueAt || defaultDueAt) ||
+      startAt !== toLocalDateTime(task?.startAt) ||
+      notes !== (task?.notes || ""));
+
+  function close() {
+    if (saving) return;
+    if (hasChanges && !window.confirm(translate(locale, "tasks.unsaved.warning"))) return;
+    onClose();
+  }
+
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    if (readOnly || saving) return;
     const cleanTitle = title.trim();
     if (!cleanTitle) {
       setError(translate(locale, "tasks.field.title"));
@@ -245,8 +272,7 @@ export function UnifiedTaskDialog({
         const data = (await response.json()) as { task: TaskItem };
         const updated = {
           ...data.task,
-          assigneeName:
-            assignees.find((p) => p.id === data.task.assignedTo)?.displayName ?? null,
+          assigneeName: assignees.find((p) => p.id === data.task.assignedTo)?.displayName ?? null,
         };
 
         window.dispatchEvent(
@@ -288,8 +314,7 @@ export function UnifiedTaskDialog({
         const data = (await response.json()) as { task: TaskItem };
         const created = {
           ...data.task,
-          assigneeName:
-            assignees.find((p) => p.id === data.task.assignedTo)?.displayName ?? null,
+          assigneeName: assignees.find((p) => p.id === data.task.assignedTo)?.displayName ?? null,
         };
 
         window.dispatchEvent(
@@ -309,10 +334,9 @@ export function UnifiedTaskDialog({
   }
 
   const selectedProject = projects.find((p) => p.id === selectedProjectId);
-  const projectName =
-    selectedProject?.isPersonal
-      ? translate(locale, "projects.myProject")
-      : selectedProject?.name || "";
+  const projectName = selectedProject?.isPersonal
+    ? translate(locale, "projects.myProject")
+    : selectedProject?.name || "";
 
   // Check on-time status if task is completed
   const isCompleted = state === "done" || Boolean(task?.completedAt);
@@ -326,27 +350,31 @@ export function UnifiedTaskDialog({
       size="wide"
       placement={placement}
       open={open}
-      onClose={onClose}
-      title={task ? translate(locale, "tasks.edit.title") : translate(locale, "tasks.create.title")}
+      onClose={close}
+      title={
+        task
+          ? readOnly
+            ? task.title
+            : translate(locale, "tasks.edit.title")
+          : translate(locale, "tasks.create.title")
+      }
       closeLabel={translate(locale, "common.close")}
       footer={
         <div className="ui-next-notion-task__actions">
-          <Button type="button" variant="secondary" onClick={onClose}>
-            {translate(locale, "common.cancel")}
+          <Button type="button" variant="secondary" disabled={saving} onClick={close}>
+            {translate(locale, readOnly ? "common.close" : "common.cancel")}
           </Button>
-          <Button
-            type="submit"
-            form={formId}
-            variant="primary"
-            loading={saving}
-            loadingLabel={translate(locale, "common.loading")}
-            onClick={() => {
-              const form = document.getElementById(formId) as HTMLFormElement | null;
-              if (form) form.requestSubmit();
-            }}
-          >
-            {task ? translate(locale, "common.save") : translate(locale, "tasks.create.submit")}
-          </Button>
+          {!readOnly ? (
+            <Button
+              type="submit"
+              form={formId}
+              variant="primary"
+              loading={saving}
+              loadingLabel={translate(locale, "common.loading")}
+            >
+              {task ? translate(locale, "common.save") : translate(locale, "tasks.create.submit")}
+            </Button>
+          ) : null}
         </div>
       }
     >
@@ -356,6 +384,8 @@ export function UnifiedTaskDialog({
           <input
             id="task-dialog-title"
             name="title"
+            aria-label={translate(locale, "tasks.field.title")}
+            disabled={readOnly || saving}
             type="text"
             required
             maxLength={300}
@@ -368,10 +398,13 @@ export function UnifiedTaskDialog({
         </div>
 
         {/* Notion 2-Column Property Grid */}
-        <div className="ui-next-notion-task__properties" role="group" aria-label={translate(locale, "tasks.title")}>
-
+        <div
+          className="ui-next-notion-task__properties"
+          role="group"
+          aria-label={translate(locale, "tasks.title")}
+        >
           {/* Project Property – full width, only shown when user can choose */}
-          {projects.length > 1 && !currentProjectId ? (
+          {projects.length > 1 && !currentProjectId && !task ? (
             <div className="ui-next-notion-property ui-next-notion-property--full">
               <span className="ui-next-notion-property__label">
                 <span>{translate(locale, "tasks.field.project")}</span>
@@ -380,6 +413,8 @@ export function UnifiedTaskDialog({
                 <select
                   className="ui-next-notion-control"
                   value={selectedProjectId}
+                  aria-label={translate(locale, "tasks.field.project")}
+                  disabled={saving}
                   onChange={(e) => setSelectedProjectId(e.target.value)}
                   required
                 >
@@ -391,7 +426,7 @@ export function UnifiedTaskDialog({
                 </select>
               </div>
             </div>
-          ) : currentProjectId ? (
+          ) : currentProjectId || task ? (
             <div className="ui-next-notion-property ui-next-notion-property--full">
               <span className="ui-next-notion-property__label">
                 <span>{translate(locale, "tasks.field.project")}</span>
@@ -412,6 +447,8 @@ export function UnifiedTaskDialog({
             <div className="ui-next-notion-property__value">
               <select
                 name="state"
+                aria-label={translate(locale, "tasks.field.state")}
+                disabled={readOnly || saving}
                 className="ui-next-notion-control"
                 value={state}
                 onChange={(e) => setState(e.target.value as TaskItem["state"])}
@@ -432,6 +469,8 @@ export function UnifiedTaskDialog({
             <div className="ui-next-notion-property__value">
               <select
                 name="assigneeId"
+                aria-label={translate(locale, "tasks.field.assignee")}
+                disabled={readOnly || saving}
                 className="ui-next-notion-control"
                 value={assigneeId}
                 onChange={(e) => setAssigneeId(e.target.value)}
@@ -454,6 +493,8 @@ export function UnifiedTaskDialog({
             <div className="ui-next-notion-property__value">
               <select
                 name="priority"
+                aria-label={translate(locale, "tasks.field.priority")}
+                disabled={readOnly || saving}
                 className="ui-next-notion-control"
                 value={priority}
                 onChange={(e) => setPriority(e.target.value as NonNullable<TaskItem["priority"]>)}
@@ -474,6 +515,8 @@ export function UnifiedTaskDialog({
             <div className="ui-next-notion-property__value">
               <input
                 name="sprint"
+                aria-label={translate(locale, "tasks.field.sprint")}
+                disabled={readOnly || saving}
                 type="text"
                 className="ui-next-notion-control"
                 value={sprint}
@@ -491,6 +534,8 @@ export function UnifiedTaskDialog({
             <div className="ui-next-notion-property__value">
               <select
                 name="kind"
+                aria-label={translate(locale, "tasks.field.kind")}
+                disabled={readOnly || saving}
                 className="ui-next-notion-control"
                 value={kind}
                 onChange={(e) => setKind(e.target.value as NonNullable<TaskItem["kind"]>)}
@@ -511,6 +556,8 @@ export function UnifiedTaskDialog({
             <div className="ui-next-notion-property__value">
               <input
                 name="estimatePoints"
+                aria-label={translate(locale, "tasks.field.estimatePoints")}
+                disabled={readOnly || saving}
                 type="number"
                 min={0}
                 max={100}
@@ -531,6 +578,8 @@ export function UnifiedTaskDialog({
               <div className="ui-next-notion-property__value">
                 <select
                   name="activityId"
+                  aria-label={translate(locale, "tasks.field.activity")}
+                  disabled={readOnly || saving}
                   className="ui-next-notion-control"
                   value={activityId}
                   onChange={(e) => setActivityId(e.target.value)}
@@ -554,6 +603,8 @@ export function UnifiedTaskDialog({
             <div className="ui-next-notion-property__value">
               <input
                 name="dueAt"
+                aria-label={translate(locale, "tasks.field.dueAt")}
+                disabled={readOnly || saving}
                 type="datetime-local"
                 className="ui-next-notion-control"
                 value={dueAt}
@@ -570,6 +621,8 @@ export function UnifiedTaskDialog({
             <div className="ui-next-notion-property__value">
               <input
                 name="startAt"
+                aria-label={translate(locale, "tasks.field.startAt")}
+                disabled={readOnly || saving}
                 type="datetime-local"
                 className="ui-next-notion-control"
                 value={startAt}
@@ -586,7 +639,10 @@ export function UnifiedTaskDialog({
               </span>
               <div className="ui-next-notion-property__value">
                 <span className="ui-next-notion-property__static-value">
-                  {formatUiDate(task.startedAt, locale, { dateStyle: "medium", timeStyle: "short" })}
+                  {formatUiDate(task.startedAt, locale, {
+                    dateStyle: "medium",
+                    timeStyle: "short",
+                  })}
                 </span>
               </div>
             </div>
@@ -600,7 +656,10 @@ export function UnifiedTaskDialog({
               </span>
               <div className="ui-next-notion-property__value">
                 <span className="ui-next-notion-property__static-value">
-                  {formatUiDate(task.completedAt, locale, { dateStyle: "medium", timeStyle: "short" })}
+                  {formatUiDate(task.completedAt, locale, {
+                    dateStyle: "medium",
+                    timeStyle: "short",
+                  })}
                 </span>
                 <StatusBadge tone={isOnTime ? "success" : "warning"}>
                   {translate(locale, isOnTime ? "tasks.onTime" : "tasks.late")}
@@ -621,6 +680,8 @@ export function UnifiedTaskDialog({
           <textarea
             id="task-dialog-notes"
             name="notes"
+            aria-label={translate(locale, "tasks.field.notes")}
+            disabled={readOnly || saving}
             rows={4}
             className="ui-next-notion-task__notes-input"
             value={notes}
@@ -670,9 +731,13 @@ export function UnifiedTaskDialog({
             ) : (
               <div className="ui-next-task-history">
                 {historyLoading ? (
-                  <p className="ui-next-task-history__empty">{translate(locale, "common.loading")}</p>
+                  <p className="ui-next-task-history__empty">
+                    {translate(locale, "common.loading")}
+                  </p>
                 ) : history.length === 0 ? (
-                  <p className="ui-next-task-history__empty">{translate(locale, "tasks.history.empty")}</p>
+                  <p className="ui-next-task-history__empty">
+                    {translate(locale, "tasks.history.empty")}
+                  </p>
                 ) : (
                   history.map((item) => (
                     <div key={item.id} className="ui-next-task-history__item">
@@ -699,7 +764,11 @@ export function UnifiedTaskDialog({
                             {translate(locale, ("tasks.state." + (item.toState || "todo")) as any)}
                           </StatusBadge>
                           <span className="ui-next-task-history__time">
-                            • {formatUiDate(item.createdAt, locale, { dateStyle: "short", timeStyle: "short" })}
+                            •{" "}
+                            {formatUiDate(item.createdAt, locale, {
+                              dateStyle: "short",
+                              timeStyle: "short",
+                            })}
                           </span>
                         </div>
                         {item.notes ? (

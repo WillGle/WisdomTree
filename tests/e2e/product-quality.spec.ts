@@ -175,6 +175,23 @@ test("contributors cannot access or save Project settings", async ({ browser, ba
   }
 });
 
+test("Kanban boards expose a localized accessible region name", async ({ page }) => {
+  try {
+    for (const [locale, boardName] of [
+      ["vi", "Bảng Kanban công việc"],
+      ["en", "Task Kanban"],
+    ] as const) {
+      expect((await page.request.patch("/api/app/locale", { data: { locale } })).ok()).toBe(true);
+      await renderedPage(page, `/app/projects/${fixture.sharedProjectId}/tasks?view=kanban`);
+      await expect(page.getByRole("region", { name: boardName, exact: true })).toBeVisible();
+      await renderedPage(page, "/app/my-work");
+      await expect(page.getByRole("region", { name: boardName, exact: true })).toBeVisible();
+    }
+  } finally {
+    await page.request.patch("/api/app/locale", { data: { locale: "vi" } });
+  }
+});
+
 test("zoom-equivalent layouts retain Task views and readable administration forms", async ({
   page,
 }) => {

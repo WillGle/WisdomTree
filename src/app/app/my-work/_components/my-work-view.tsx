@@ -279,6 +279,7 @@ export function MyWorkView({ locale, tasks }: { locale: UiLocale; tasks: MyTask[
       ) : (
         /* Full Responsive Kanban Board */
         <div
+          role="region"
           className="ui-next-kanban ui-next-my-work-kanban"
           aria-label={translate(locale, "tasks.kanban")}
         >

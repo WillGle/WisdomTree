@@ -89,7 +89,7 @@ export function TasksView({
     }
     if (openedTaskId.current === initialTaskId) return;
     const task = tasks.find((item) => item.id === initialTaskId);
-    if (task?.canEdit) {
+    if (task) {
       openedTaskId.current = initialTaskId;
       setEditing(task);
     }
@@ -264,9 +264,13 @@ export function TasksView({
                   <TaskSummary task={task} activities={activities} locale={locale} />
                 </button>
               ) : (
-                <div className="ui-next-task-list__row ui-next-task-list__row--readonly">
+                <button
+                  type="button"
+                  className="ui-next-task-list__row ui-next-task-list__row--readonly"
+                  onClick={() => setEditing(task)}
+                >
                   <TaskSummary task={task} activities={activities} locale={locale} />
-                </div>
+                </button>
               )}
             </li>
           ))}
@@ -385,7 +389,11 @@ function TasksTable({
   }
 
   return (
-    <div className="ui-next-tasks-table-wrapper" role="region" aria-label={translate(locale, "tasks.view.table")}>
+    <div
+      className="ui-next-tasks-table-wrapper"
+      role="region"
+      aria-label={translate(locale, "tasks.view.table")}
+    >
       <table className="ui-next-tasks-table">
         <thead>
           <tr>
@@ -403,7 +411,16 @@ function TasksTable({
           {tasks.map((task) => (
             <tr key={task.id} onClick={() => onOpen(task)}>
               <td className="ui-next-tasks-table__title">
-                <strong>{task.title}</strong>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    onOpen(task);
+                  }}
+                >
+                  <strong>{task.title}</strong>
+                </Button>
               </td>
               <td>
                 <StatusBadge
@@ -419,7 +436,9 @@ function TasksTable({
                 </StatusBadge>
               </td>
               <td>
-                <span className={`ui-next-priority-pill ui-next-priority-pill--${task.priority || "medium"}`}>
+                <span
+                  className={`ui-next-priority-pill ui-next-priority-pill--${task.priority || "medium"}`}
+                >
                   {translate(locale, `tasks.priority.${task.priority || "medium"}`)}
                 </span>
               </td>
@@ -434,9 +453,7 @@ function TasksTable({
                 </span>
               </td>
               <td>
-                <span className="text-xs text-ui-text-muted">
-                  {task.sprint || "—"}
-                </span>
+                <span className="text-xs text-ui-text-muted">{task.sprint || "—"}</span>
               </td>
               <td>
                 {task.estimatePoints != null ? (
@@ -509,7 +526,8 @@ function SprintView({
               <div className="ui-next-sprint-header__info">
                 <h3 className="ui-next-sprint-header__title">{sprintName}</h3>
                 <span className="ui-next-points-pill">
-                  {completedCount}/{sprintTasks.length} {translate(locale, "tasks.completed").toLowerCase()}
+                  {completedCount}/{sprintTasks.length}{" "}
+                  {translate(locale, "tasks.completed").toLowerCase()}
                 </span>
               </div>
               <div className="ui-next-sprint-header__stats">
@@ -528,7 +546,16 @@ function SprintView({
                   {sprintTasks.map((task) => (
                     <tr key={task.id} onClick={() => onOpen(task)}>
                       <td className="ui-next-tasks-table__title">
-                        <strong>{task.title}</strong>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            onOpen(task);
+                          }}
+                        >
+                          <strong>{task.title}</strong>
+                        </Button>
                       </td>
                       <td>
                         <StatusBadge
@@ -544,7 +571,9 @@ function SprintView({
                         </StatusBadge>
                       </td>
                       <td>
-                        <span className={`ui-next-priority-pill ui-next-priority-pill--${task.priority || "medium"}`}>
+                        <span
+                          className={`ui-next-priority-pill ui-next-priority-pill--${task.priority || "medium"}`}
+                        >
                           {translate(locale, `tasks.priority.${task.priority || "medium"}`)}
                         </span>
                       </td>
@@ -562,7 +591,9 @@ function SprintView({
                       </td>
                       <td>
                         <span className="text-xs text-ui-text-muted">
-                          {task.dueAt ? formatUiDate(task.dueAt, locale, { dateStyle: "short" }) : "—"}
+                          {task.dueAt
+                            ? formatUiDate(task.dueAt, locale, { dateStyle: "short" })
+                            : "—"}
                         </span>
                       </td>
                     </tr>
@@ -600,7 +631,7 @@ function Kanban({
 }) {
   const states = ["todo", "doing", "done"] as const;
   return (
-    <div className="ui-next-kanban" aria-label={translate(locale, "tasks.kanban")}>
+    <div role="region" className="ui-next-kanban" aria-label={translate(locale, "tasks.kanban")}>
       {states.map((state) => {
         const laneTasks = tasks.filter((task) => task.state === state);
         return (
@@ -742,4 +773,3 @@ function TaskSummary({
     </>
   );
 }
-

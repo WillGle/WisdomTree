@@ -49,7 +49,7 @@ export async function run() {
   );
   assert.match(taskView, /task\.canEdit \? \(/);
   assert.match(taskView, /ui-next-task-list__row--readonly/);
-  assert.match(taskView, /ui-next-kanban/);
+  assert.match(taskView, /<div\s+role="region"\s+className="ui-next-kanban"/);
   assert.match(taskView, /tasks\.view\.kanban/);
   assert.match(taskView, /tasks\.view\.table/);
   assert.match(taskView, /tasks\.view\.sprint/);
@@ -66,6 +66,11 @@ export async function run() {
   assert.match(pmService, /completedBy/);
   assert.match(pmService, /taskStatusHistory/);
 
+  const myWorkView = readFileSync(`${root}/app/my-work/_components/my-work-view.tsx`, "utf8");
+  assert.match(
+    myWorkView,
+    /<div\s+role="region"\s+className="ui-next-kanban ui-next-my-work-kanban"/,
+  );
   const myWork = readFileSync("src/modules/application/overview.ts", "utf8");
   assert.match(myWork, /listAppMyWorkTasks/);
 

@@ -108,6 +108,8 @@ export function CalendarWorkspace({
   const [error, setError] = useState<string | null>(null);
   const [taskDialogOpen, setTaskDialogOpen] = useState(false);
   const [selectedTask, setSelectedTask] = useState<TaskItem | null>(null);
+  const [failedTask, setFailedTask] = useState<Task | null>(null);
+  const [loadingTask, setLoadingTask] = useState(false);
   const [taskDueAt, setTaskDueAt] = useState<Date | string | null>(null);
 
   useEffect(() => {
@@ -123,36 +125,23 @@ export function CalendarWorkspace({
   }, [router]);
 
   async function openTaskInDialog(task: Task) {
+    if (loadingTask) return;
+    setLoadingTask(true);
+    setFailedTask(null);
     try {
       const res = await fetch(`/api/app/projects/${encodeURIComponent(task.projectId)}/tasks`);
-      if (res.ok) {
-        const data = await res.json();
-        const full = (data.tasks as TaskItem[]).find((t) => t.id === task.id);
-        if (full) {
-          setSelectedTask(full);
-          setTaskDueAt(null);
-          setTaskDialogOpen(true);
-          return;
-        }
-      }
+      if (!res.ok) throw new Error("task_load_failed");
+      const data = await res.json();
+      const full = (data.tasks as TaskItem[]).find((t) => t.id === task.id);
+      if (!full) throw new Error("task_not_found");
+      setSelectedTask(full);
+      setTaskDueAt(null);
+      setTaskDialogOpen(true);
     } catch {
-      // fallback below
+      setFailedTask(task);
+    } finally {
+      setLoadingTask(false);
     }
-    setSelectedTask({
-      id: task.id,
-      projectId: task.projectId,
-      activityId: task.activityId,
-      title: task.title,
-      state: task.state,
-      assignedTo: null,
-      assigneeName: task.assigneeName,
-      dueAt: task.dueAt,
-      notes: null,
-      version: 1,
-      canEdit: true,
-    });
-    setTaskDueAt(null);
-    setTaskDialogOpen(true);
   }
 
   const editableProjects = projects.filter((project) => project.canEditDeadline);
@@ -223,7 +212,8 @@ export function CalendarWorkspace({
       <li key={`task-${task.id}`}>
         <button
           type="button"
-          onClick={() => openTaskInDialog(task)}
+          disabled={loadingTask}
+          onClick={() => void openTaskInDialog(task)}
           className="ui-next-cal-chip ui-next-cal-chip--task"
         >
           <span className="ui-next-cal-chip__title">{task.title}</span>
@@ -272,6 +262,14 @@ export function CalendarWorkspace({
 
   return (
     <section className="ui-next-calendar" aria-labelledby="calendar-title">
+      {failedTask ? (
+        <div role="alert" className="ui-next-work-form__error">
+          <p>{translate(locale, "tasks.loadFailed")}</p>
+          <Button type="button" onClick={() => void openTaskInDialog(failedTask)}>
+            {translate(locale, "saveStatus.retry")}
+          </Button>
+        </div>
+      ) : null}
       {/* ── Compact top toolbar ─────────────────────────────────── */}
       <div className="ui-next-cal-toolbar">
         <nav className="ui-next-cal-tabs" aria-label={translate(locale, "calendar.views")}>
@@ -323,13 +321,21 @@ export function CalendarWorkspace({
           )}
 
           <nav className="ui-next-cal-nav" aria-label={translate(locale, "calendar.views")}>
-            <Link href={prevHref} className="ui-next-cal-nav__arrow" aria-label={translate(locale, "calendar.previous")}>
+            <Link
+              href={prevHref}
+              className="ui-next-cal-nav__arrow"
+              aria-label={translate(locale, "calendar.previous")}
+            >
               ‹
             </Link>
             <Link href={todayHref} className="ui-next-cal-nav__today">
               {translate(locale, "calendar.today")}
             </Link>
-            <Link href={nextHref} className="ui-next-cal-nav__arrow" aria-label={translate(locale, "calendar.next")}>
+            <Link
+              href={nextHref}
+              className="ui-next-cal-nav__arrow"
+              aria-label={translate(locale, "calendar.next")}
+            >
               ›
             </Link>
           </nav>
@@ -411,7 +417,14 @@ export function CalendarWorkspace({
                         onClick={() => {
                           setSelectedTask(null);
                           const dateIso = new Date(
-                            Date.UTC(day.getUTCFullYear(), day.getUTCMonth(), day.getUTCDate(), 17, 0, 0),
+                            Date.UTC(
+                              day.getUTCFullYear(),
+                              day.getUTCMonth(),
+                              day.getUTCDate(),
+                              17,
+                              0,
+                              0,
+                            ),
                           ).toISOString();
                           setTaskDueAt(dateIso);
                           setTaskDialogOpen(true);
@@ -450,9 +463,7 @@ export function CalendarWorkspace({
         </div>
 
         {!tasks.length && !deadlines.length ? (
-          <p className="ui-next-calendar__empty">
-            {translate(locale, "calendar.noEntries")}
-          </p>
+          <p className="ui-next-calendar__empty">{translate(locale, "calendar.noEntries")}</p>
         ) : null}
       </section>
 
