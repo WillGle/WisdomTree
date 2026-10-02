@@ -239,3 +239,13 @@
     grid-template-columns: 1fr;
   }
 }
+
+.ui-next-overview-columns--research {
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+}
+
+@media (max-width: 64rem) {
+  .ui-next-overview-columns--research {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

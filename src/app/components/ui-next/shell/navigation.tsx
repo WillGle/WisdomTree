@@ -8,6 +8,7 @@ import { translate, type UiNextMessageKey } from "../localization";
 type Destination = {
   href: string;
   labelKey: UiNextMessageKey;
+  group: "research" | "organize" | "tools";
   icon:
     | "overview"
     | "projects"
@@ -21,14 +22,19 @@ type Destination = {
 };
 
 const destinations: Destination[] = [
-  { href: "/app", labelKey: "nav.overview", icon: "overview" },
-  { href: "/app/projects", labelKey: "nav.projects", icon: "projects" },
-  { href: "/app/calendar", labelKey: "nav.calendar", icon: "calendar" },
-  { href: "/app/my-work", labelKey: "nav.myWork", icon: "work" },
-  { href: "/app/people", labelKey: "nav.people", icon: "people" },
-  { href: "/app/search", labelKey: "nav.search", icon: "search" },
-  { href: "/app/graph", labelKey: "nav.graph", icon: "graph" },
-  { href: "/app/notifications", labelKey: "nav.notifications", icon: "notifications" },
+  { href: "/app", group: "research", labelKey: "nav.overview", icon: "overview" },
+  { href: "/app/projects", group: "research", labelKey: "nav.projects", icon: "projects" },
+  { href: "/app/calendar", group: "organize", labelKey: "nav.calendar", icon: "calendar" },
+  { href: "/app/my-work", group: "organize", labelKey: "nav.myWork", icon: "work" },
+  { href: "/app/people", group: "organize", labelKey: "nav.people", icon: "people" },
+  { href: "/app/search", group: "research", labelKey: "nav.search", icon: "search" },
+  { href: "/app/graph", group: "tools", labelKey: "nav.graph", icon: "graph" },
+  {
+    href: "/app/notifications",
+    group: "tools",
+    labelKey: "nav.notifications",
+    icon: "notifications",
+  },
 ];
 
 function NavigationIcon({ icon }: { icon: Destination["icon"] }) {
@@ -124,7 +130,12 @@ export function GlobalNavigation({
   const availableDestinations = canAccessAdministration
     ? [
         ...destinations,
-        { href: "/app/admin", labelKey: "nav.admin" as const, icon: "admin" as const },
+        {
+          href: "/app/admin",
+          group: "tools" as const,
+          labelKey: "nav.admin" as const,
+          icon: "admin" as const,
+        },
       ]
     : destinations;
   return (
@@ -132,30 +143,37 @@ export function GlobalNavigation({
       className="ui-next-global-nav grid gap-1"
       aria-label={translate(locale, "shell.primaryNavigation")}
     >
-      {availableDestinations.map((destination) => {
-        const label = translate(locale, destination.labelKey);
-        const current = isCurrent(pathname, destination.href);
-        return (
-          <Link
-            key={destination.href}
-            href={destination.href}
-            className={`ui-next-global-nav__link relative min-h-[2.75rem] flex items-center gap-3 border rounded px-3 py-2 text-sm font-semibold transition-colors ${
-              current
-                ? "border-ui-border bg-ui-surface text-ui-text shadow-[inset_0.25rem_0_var(--ui-color-primary)]"
-                : "border-transparent text-ui-text-secondary hover:bg-ui-surface hover:text-ui-text"
-            }`}
-            aria-current={current ? "page" : undefined}
-            data-label={label}
-            title={label}
-            onClick={onNavigate}
-          >
-            <span className="ui-next-global-nav__icon size-5 shrink-0">
-              <NavigationIcon icon={destination.icon} />
-            </span>
-            <span className="ui-next-global-nav__label">{label}</span>
-          </Link>
-        );
-      })}
+      {(["research", "organize", "tools"] as const).map((group) => (
+        <div key={group} className="ui-next-global-nav__group">
+          <p className="ui-next-global-nav__heading">{translate(locale, `nav.${group}`)}</p>
+          {availableDestinations
+            .filter((destination) => destination.group === group)
+            .map((destination) => {
+              const label = translate(locale, destination.labelKey);
+              const current = isCurrent(pathname, destination.href);
+              return (
+                <Link
+                  key={destination.href}
+                  href={destination.href}
+                  className={`ui-next-global-nav__link relative min-h-[2.75rem] flex items-center gap-3 border rounded px-3 py-2 text-sm font-semibold transition-colors ${
+                    current
+                      ? "border-ui-border bg-ui-surface text-ui-text shadow-[inset_0.25rem_0_var(--ui-color-primary)]"
+                      : "border-transparent text-ui-text-secondary hover:bg-ui-surface hover:text-ui-text"
+                  }`}
+                  aria-current={current ? "page" : undefined}
+                  data-label={label}
+                  title={label}
+                  onClick={onNavigate}
+                >
+                  <span className="ui-next-global-nav__icon size-5 shrink-0">
+                    <NavigationIcon icon={destination.icon} />
+                  </span>
+                  <span className="ui-next-global-nav__label">{label}</span>
+                </Link>
+              );
+            })}
+        </div>
+      ))}
     </nav>
   );
 }

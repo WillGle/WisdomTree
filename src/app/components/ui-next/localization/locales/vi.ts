@@ -494,7 +494,7 @@ export const viMessages = {
   "notes.action.livePreview": "Xem trước trực tiếp",
   "notes.action.focusMode": "Chế độ tập trung",
   "notes.action.exitFocus": "Thoát tập trung",
-  "notes.action.inspector": "Dẫn chứng & chia sẻ",
+  "notes.action.inspector": "Thông tin chi tiết",
   "notes.action.closeInspector": "Đóng chi tiết",
   "notes.field.title": "Tiêu đề",
   "notes.field.titlePlaceholder": "Nhập tiêu đề ghi chú…",

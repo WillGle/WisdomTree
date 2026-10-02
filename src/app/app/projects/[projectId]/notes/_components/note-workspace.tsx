@@ -289,6 +289,24 @@ export function NoteWorkspace({
       className={`ui-next-note-workspace ${focusMode ? "ui-next-note-workspace--focus" : ""}`}
     >
       <div className="ui-next-note-workspace__main">
+        {!focusMode ? (
+          <section
+            className="ui-next-research-context"
+            aria-label={translate(locale, "journey.reviewEvidence")}
+          >
+            <p>{translate(locale, isDraft ? "journey.draftHelp" : "journey.sharedHelp")}</p>
+            <div className="ui-next-research-actions">
+              {canEditDraft ? (
+                <Button type="button" variant="secondary" onClick={handleOpenEvidencePicker}>
+                  {translate(locale, "journey.evidence")}
+                </Button>
+              ) : null}
+              <Button type="button" variant="ghost" onClick={() => setInspectorOpen(true)}>
+                {translate(locale, "journey.reviewEvidence")}
+              </Button>
+            </div>
+          </section>
+        ) : null}
         {mode === "reader" && officialNote ? (
           <NoteReader
             locale={locale}

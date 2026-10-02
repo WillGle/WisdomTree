@@ -14,9 +14,9 @@ const projectModules: Array<{
   module: keyof WorkspaceModules | null;
   labelKey: UiNextMessageKey;
 }> = [
-  { segment: "", module: null, labelKey: "project.overview" },
-  { segment: "notes", module: "notes", labelKey: "project.notes" },
-  { segment: "materials", module: "materials", labelKey: "project.materials" },
+  { segment: "", module: null, labelKey: "journey.projectHome" },
+  { segment: "materials", module: "materials", labelKey: "journey.collect" },
+  { segment: "notes", module: "notes", labelKey: "journey.write" },
   { segment: "activities", module: "activities", labelKey: "project.activities" },
   { segment: "tasks", module: "tasks", labelKey: "project.tasks" },
   { segment: "people", module: "people", labelKey: "project.people" },

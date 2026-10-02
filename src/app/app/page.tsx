@@ -23,56 +23,11 @@ export default async function AppOverviewPage() {
     <PageContainer width="wide">
       <Stack>
         <PageHeader
-          title={translate(application.locale, "page.overview.title")}
-          description={translate(application.locale, "page.overview.description")}
+          title={translate(application.locale, "journey.homeTitle")}
+          description={translate(application.locale, "journey.homeHelp")}
         />
 
-        <div className="ui-next-overview-columns grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(0,2fr)] gap-6 items-start">
-          <section
-            className="ui-next-overview-section grid gap-4"
-            aria-labelledby="overview-work-title"
-          >
-            <div className="ui-next-section-heading flex flex-col sm:flex-row sm:items-end justify-between gap-4">
-              <div>
-                <h2 id="overview-work-title" className="m-0 text-lg font-bold">
-                  {translate(application.locale, "overview.myWork.title")}
-                </h2>
-                <p className="mt-1 text-ui-text-secondary text-sm">
-                  {translate(application.locale, "overview.myWork.description")}
-                </p>
-              </div>
-              <Link
-                href="/app/my-work"
-                className="text-ui-accent font-semibold hover:underline shrink-0 text-sm"
-              >
-                {translate(application.locale, "overview.myWork.open")}
-              </Link>
-            </div>
-            {hasActiveWork ? (
-              <Surface>
-                <dl className="ui-next-work-summary grid grid-cols-1 sm:grid-cols-2 gap-4 m-0">
-                  <div className="flex items-baseline justify-between gap-4">
-                    <dt className="text-ui-text-secondary text-sm">
-                      {translate(application.locale, "overview.myWork.tasks")}
-                    </dt>
-                    <dd className="m-0 text-lg font-bold">{overview.myWork.assignedTaskCount}</dd>
-                  </div>
-                  <div className="flex items-baseline justify-between gap-4">
-                    <dt className="text-ui-text-secondary text-sm">
-                      {translate(application.locale, "overview.myWork.activities")}
-                    </dt>
-                    <dd className="m-0 text-lg font-bold">{overview.myWork.activeActivityCount}</dd>
-                  </div>
-                </dl>
-              </Surface>
-            ) : (
-              <EmptyState
-                title={translate(application.locale, "overview.myWork.emptyTitle")}
-                description={translate(application.locale, "overview.myWork.emptyDescription")}
-              />
-            )}
-          </section>
-
+        <div className="ui-next-overview-columns ui-next-overview-columns--research">
           <section
             className="ui-next-overview-section grid gap-4"
             aria-labelledby="overview-projects-title"
@@ -85,6 +40,57 @@ export default async function AppOverviewPage() {
                 <p className="mt-1 text-ui-text-secondary text-sm">
                   {translate(application.locale, "overview.projects.description")}
                 </p>
+                <section
+                  className="ui-next-overview-section grid gap-4"
+                  aria-labelledby="overview-work-title"
+                >
+                  <div className="ui-next-section-heading flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+                    <div>
+                      <h2 id="overview-work-title" className="m-0 text-lg font-bold">
+                        {translate(application.locale, "overview.myWork.title")}
+                      </h2>
+                      <p className="mt-1 text-ui-text-secondary text-sm">
+                        {translate(application.locale, "overview.myWork.description")}
+                      </p>
+                    </div>
+                    <Link
+                      href="/app/my-work"
+                      className="text-ui-accent font-semibold hover:underline shrink-0 text-sm"
+                    >
+                      {translate(application.locale, "overview.myWork.open")}
+                    </Link>
+                  </div>
+                  {hasActiveWork ? (
+                    <Surface>
+                      <dl className="ui-next-work-summary grid grid-cols-1 sm:grid-cols-2 gap-4 m-0">
+                        <div className="flex items-baseline justify-between gap-4">
+                          <dt className="text-ui-text-secondary text-sm">
+                            {translate(application.locale, "overview.myWork.tasks")}
+                          </dt>
+                          <dd className="m-0 text-lg font-bold">
+                            {overview.myWork.assignedTaskCount}
+                          </dd>
+                        </div>
+                        <div className="flex items-baseline justify-between gap-4">
+                          <dt className="text-ui-text-secondary text-sm">
+                            {translate(application.locale, "overview.myWork.activities")}
+                          </dt>
+                          <dd className="m-0 text-lg font-bold">
+                            {overview.myWork.activeActivityCount}
+                          </dd>
+                        </div>
+                      </dl>
+                    </Surface>
+                  ) : (
+                    <EmptyState
+                      title={translate(application.locale, "overview.myWork.emptyTitle")}
+                      description={translate(
+                        application.locale,
+                        "overview.myWork.emptyDescription",
+                      )}
+                    />
+                  )}
+                </section>
               </div>
               <Link
                 href="/app/projects"

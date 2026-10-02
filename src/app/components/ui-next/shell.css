@@ -706,3 +706,26 @@
     font-size: 1.25rem;
   }
 }
+
+.ui-next-global-nav__group {
+  display: grid;
+  gap: var(--ui-space-1);
+}
+
+.ui-next-global-nav__group + .ui-next-global-nav__group {
+  margin-block-start: var(--ui-space-4);
+  padding-block-start: var(--ui-space-4);
+  border-block-start: 1px solid var(--ui-color-border);
+}
+
+.ui-next-global-nav__heading {
+  margin: 0 0 var(--ui-space-2);
+  padding-inline: var(--ui-space-3);
+  color: var(--ui-color-text-muted);
+  font-size: var(--ui-font-size-xs);
+  font-weight: 650;
+}
+
+:root[data-sidebar="collapsed"] .ui-next-app-sidebar .ui-next-global-nav__heading {
+  display: none;
+}

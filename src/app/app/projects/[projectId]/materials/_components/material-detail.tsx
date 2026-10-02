@@ -318,6 +318,11 @@ export function MaterialDetail({
         </StatusBadge>
       </header>
 
+      <div className="ui-next-research-context">
+        <strong>{translate(locale, "journey.sourcesNext")}</strong>
+        <p>{translate(locale, "journey.sourcesNextHelp")}</p>
+      </div>
+
       {canManageMaterial ? (
         <form className="ui-next-material-version-form" onSubmit={uploadVersion}>
           <label>
@@ -333,40 +338,6 @@ export function MaterialDetail({
             {translate(locale, "materials.uploadVersion")}
           </Button>
         </form>
-      ) : null}
-
-      {canStewardMaterial ? (
-        <section className="ui-next-material-panel" aria-labelledby="material-stewardship-title">
-          <h3 id="material-stewardship-title">{translate(locale, "materials.stewardship")}</h3>
-          <form className="ui-next-material-form" onSubmit={saveMetadata}>
-            <label>
-              <span>{translate(locale, "materials.field.title")}</span>
-              <input name="title" defaultValue={material.title} required maxLength={300} />
-            </label>
-            <label>
-              <span>{translate(locale, "materials.field.description")}</span>
-              <textarea name="description" defaultValue={material.description ?? ""} rows={3} />
-            </label>
-            <div className="ui-next-material-form__actions">
-              <Button
-                type="submit"
-                loading={pendingAction === "metadata"}
-                loadingLabel={translate(locale, "common.loading")}
-              >
-                {translate(locale, "materials.saveMetadata")}
-              </Button>
-              <Button
-                type="button"
-                variant="danger"
-                onClick={withdrawMaterial}
-                loading={pendingAction === "withdraw"}
-                loadingLabel={translate(locale, "common.loading")}
-              >
-                {translate(locale, "materials.withdraw")}
-              </Button>
-            </div>
-          </form>
-        </section>
       ) : null}
 
       <div className="ui-next-material-detail__grid">
@@ -513,6 +484,41 @@ export function MaterialDetail({
           ) : null}
         </section>
       </div>
+
+      {canStewardMaterial ? (
+        <details className="ui-next-material-panel">
+          <summary>{translate(locale, "journey.materialManage")}</summary>
+          <h3 id="material-stewardship-title">{translate(locale, "materials.stewardship")}</h3>
+          <form className="ui-next-material-form" onSubmit={saveMetadata}>
+            <label>
+              <span>{translate(locale, "materials.field.title")}</span>
+              <input name="title" defaultValue={material.title} required maxLength={300} />
+            </label>
+            <label>
+              <span>{translate(locale, "materials.field.description")}</span>
+              <textarea name="description" defaultValue={material.description ?? ""} rows={3} />
+            </label>
+            <div className="ui-next-material-form__actions">
+              <Button
+                type="submit"
+                loading={pendingAction === "metadata"}
+                loadingLabel={translate(locale, "common.loading")}
+              >
+                {translate(locale, "materials.saveMetadata")}
+              </Button>
+              <Button
+                type="button"
+                variant="danger"
+                onClick={withdrawMaterial}
+                loading={pendingAction === "withdraw"}
+                loadingLabel={translate(locale, "common.loading")}
+              >
+                {translate(locale, "materials.withdraw")}
+              </Button>
+            </div>
+          </form>
+        </details>
+      ) : null}
 
       {canManagePhysical || material.physical ? (
         <section className="ui-next-material-panel" aria-labelledby="material-physical-title">

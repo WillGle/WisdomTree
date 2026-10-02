@@ -498,7 +498,7 @@ export const enMessages: Record<keyof typeof viMessages, string> = {
   "notes.action.livePreview": "Live preview",
   "notes.action.focusMode": "Focus mode",
   "notes.action.exitFocus": "Exit focus",
-  "notes.action.inspector": "Evidence & sharing",
+  "notes.action.inspector": "Details",
   "notes.action.closeInspector": "Close details",
   "notes.field.title": "Title",
   "notes.field.titlePlaceholder": "Enter note title…",
