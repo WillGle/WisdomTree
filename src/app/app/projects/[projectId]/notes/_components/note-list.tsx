@@ -3,6 +3,7 @@ import type { UiLocale } from "@/modules/auth/profile";
 import type { DraftDto } from "@/modules/application";
 import {
   Button,
+  PageHeader,
   StatusBadge,
   translate,
   formatUiDate,
@@ -90,26 +91,21 @@ export function NoteList({
   if (items.length === 0) {
     return (
       <div className="ui-next-notes-page flex flex-col gap-6">
-        <div className="ui-next-notes-header flex items-center justify-between gap-4 flex-wrap">
-          <h2 className="m-0 text-xl font-bold text-ui-text">{translate(locale, "notes.title")}</h2>
-          {canCreateNote && onCreateClick ? (
-            <Button type="button" variant="primary" onClick={onCreateClick}>
-              {translate(locale, "notes.newNote")}
-            </Button>
-          ) : null}
-        </div>
+        <PageHeader
+          headingLevel={2}
+          title={translate(locale, "notes.title")}
+          actions={
+            canCreateNote && onCreateClick ? (
+              <Button type="button" variant="primary" onClick={onCreateClick}>
+                {translate(locale, "notes.newNote")}
+              </Button>
+            ) : null
+          }
+        />
         <div className="ui-next-empty-state flex flex-col items-center justify-center p-12 text-center bg-ui-surface border border-dashed border-ui-border rounded-lg gap-3">
           <h3 className="m-0 text-lg font-semibold text-ui-text">
             {translate(locale, "notes.emptyTitle")}
           </h3>
-          <p className="m-0 text-sm text-ui-text-secondary max-w-md">
-            {translate(locale, "notes.emptyDescription")}
-          </p>
-          {canCreateNote && onCreateClick ? (
-            <Button type="button" variant="primary" onClick={onCreateClick}>
-              {translate(locale, "notes.createFirstNote")}
-            </Button>
-          ) : null}
         </div>
       </div>
     );
@@ -117,16 +113,17 @@ export function NoteList({
 
   return (
     <div className="ui-next-notes-page flex flex-col gap-6">
-      <div className="ui-next-notes-header flex items-center justify-between gap-4 flex-wrap">
-        <h2 className="m-0 text-xl font-bold text-ui-text">
-          {translate(locale, "notes.title")} ({items.length})
-        </h2>
-        {canCreateNote && onCreateClick ? (
-          <Button type="button" variant="primary" onClick={onCreateClick}>
-            {translate(locale, "notes.newNote")}
-          </Button>
-        ) : null}
-      </div>
+      <PageHeader
+        headingLevel={2}
+        title={translate(locale, "notes.title")}
+        actions={
+          canCreateNote && onCreateClick ? (
+            <Button type="button" variant="primary" onClick={onCreateClick}>
+              {translate(locale, "notes.newNote")}
+            </Button>
+          ) : null
+        }
+      />
 
       <ul className="ui-next-notes-list flex flex-col gap-3 list-none m-0 p-0" role="list">
         {items.map((item) => (

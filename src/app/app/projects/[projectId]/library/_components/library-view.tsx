@@ -6,6 +6,7 @@ import { useMemo, useState } from "react";
 import type { UiLocale } from "@/modules/auth/profile";
 import {
   Button,
+  PageHeader,
   EmptyState,
   StatusBadge,
   formatUiDate,
@@ -123,18 +124,11 @@ export function LibraryView({
 
   return (
     <section className="ui-next-library grid gap-6" aria-labelledby="library-title">
-      <header className="ui-next-library__header">
-        <div>
-          <h2 id="library-title" className="m-0 text-lg font-bold">
-            {translate(locale, "library.title")}
-          </h2>
-          <p className="m-0 mt-2 text-ui-text-secondary">
-            {translate(locale, "library.description")}
-          </p>
-        </div>
-      </header>
-
-      <p className="ui-next-panel-help">{translate(locale, "panel.libraryHelp")}</p>
+      <PageHeader
+        headingLevel={2}
+        titleId="library-title"
+        title={translate(locale, "library.title")}
+      />
 
       {message ? (
         <p

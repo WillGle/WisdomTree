@@ -91,14 +91,7 @@ export function ProjectSettingsWorkspace({
 
   return (
     <div className="ui-next-governance grid gap-6">
-      <PageHeader
-        headingLevel={2}
-        title={translate(locale, "settings.title")}
-        description={translate(
-          locale,
-          personal ? "settings.personalDescription" : "settings.description",
-        )}
-      />
+      <PageHeader headingLevel={2} title={translate(locale, "settings.title")} />
       <Surface className="ui-next-governance__section grid gap-4">
         <h3 className="m-0 text-base font-semibold">{translate(locale, "settings.metadata")}</h3>
         <form
@@ -124,7 +117,6 @@ export function ProjectSettingsWorkspace({
             id="project-settings-lens"
             name="researchLens"
             label={translate(locale, "settings.researchLens")}
-            description={translate(locale, "settings.researchLensDescription")}
             defaultValue={project.researchLens}
             required
           />
@@ -159,7 +151,7 @@ export function ProjectSettingsWorkspace({
       {!personal ? (
         <Surface className="ui-next-governance__section">
           <h3>{translate(locale, "settings.export.title")}</h3>
-          <p>{translate(locale, "settings.export.description")}</p>
+
           <Button
             type="button"
             variant="secondary"
@@ -185,9 +177,6 @@ export function ProjectSettingsWorkspace({
               <h3 className="m-0 text-base font-semibold">
                 {translate(locale, "settings.members")}
               </h3>
-              <p className="m-0 mt-1 text-sm text-ui-text-secondary">
-                {translate(locale, "settings.membersDescription")}
-              </p>
             </div>
           </div>
           <form
@@ -325,9 +314,6 @@ export function ProjectSettingsWorkspace({
               <h3 className="m-0 text-base font-semibold">
                 {translate(locale, "settings.libraryOperators")}
               </h3>
-              <p className="m-0 mt-1 text-sm text-ui-text-secondary">
-                {translate(locale, "settings.libraryOperatorsDescription")}
-              </p>
             </div>
           </div>
           <form

@@ -1,5 +1,6 @@
 "use client";
 
+import { HelpButton } from "@/app/components/ui-next";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -89,7 +90,6 @@ export function ActivitiesView({
         headingLevel={2}
         titleId="activities-title"
         title={translate(locale, "activities.title")}
-        description={translate(locale, "activities.description")}
         actions={
           canCreate ? (
             <Button type="button" variant="primary" onClick={() => setOpen(true)}>
@@ -140,7 +140,6 @@ export function ActivitiesView({
       ) : (
         <EmptyState
           title={translate(locale, "activities.emptyTitle")}
-          description={translate(locale, "activities.emptyDescription")}
           action={
             canCreate ? (
               <Button type="button" variant="primary" onClick={() => setOpen(true)}>
@@ -170,7 +169,7 @@ export function ActivitiesView({
         open={open}
         onClose={() => setOpen(false)}
         title={translate(locale, "activities.create.title")}
-        description={translate(locale, "panel.activityHelp")}
+        headerActions={<HelpButton locale={locale} messageKeys={["panel.activityHelp"]} />}
         closeLabel={translate(locale, "common.close")}
       >
         <form

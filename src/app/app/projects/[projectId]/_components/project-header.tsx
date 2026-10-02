@@ -1,6 +1,7 @@
 import type { UiLocale } from "@/modules/auth/profile";
 import type { AppProjectDto } from "@/modules/application";
 import { StatusBadge, translate } from "../../../../components/ui-next";
+import { ResearchGuide } from "./research-guide";
 import { ProjectSwitcher } from "./project-switcher";
 
 const statusTone = {
@@ -34,28 +35,14 @@ export function ProjectHeader({
           <h1 className="m-0 text-2xl font-bold leading-tight break-words">
             {project.isPersonal ? translate(locale, "projects.myProject") : project.name}
           </h1>
-          <p
-            className="ui-next-project-header__lens max-w-[var(--ui-width-reading)] mt-2 text-ui-text-secondary break-words col-span-full max-lg:col-span-1"
-            dir="auto"
-          >
-            {project.isPersonal && project.researchLens === "Personal research workspace"
-              ? translate(locale, "projects.personalWorkspace")
-              : project.researchLens}
-          </p>
         </div>
         <div className="ui-next-project-header__badges flex flex-wrap justify-end max-lg:justify-start gap-2">
-          <StatusBadge tone={statusTone[project.status]}>
-            {translate(locale, statusMessageKey[project.status])}
-          </StatusBadge>
-          <StatusBadge tone={project.operationalMember ? "accent" : "neutral"}>
-            {translate(
-              locale,
-              project.operationalMember ? "projects.workAccess" : "projects.researchAccess",
-            )}
-          </StatusBadge>
-          {project.features.libraryCirculation ? (
-            <StatusBadge tone="information">{translate(locale, "projects.library")}</StatusBadge>
+          {project.status !== "active" ? (
+            <StatusBadge tone={statusTone[project.status]}>
+              {translate(locale, statusMessageKey[project.status])}
+            </StatusBadge>
           ) : null}
+          <ResearchGuide projectId={project.id} project={project} locale={locale} />
         </div>
       </div>
     </header>

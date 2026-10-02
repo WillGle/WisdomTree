@@ -1,4 +1,5 @@
 export const viMessages = {
+  "common.help": "Hướng dẫn",
   "nav.vaults": "Vault",
   "vault.title": "Vault",
   "vault.description": "Lưu ghi chú và tư liệu của bạn, hoặc cộng tác trong kho được chia sẻ.",

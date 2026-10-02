@@ -1,5 +1,6 @@
 "use client";
 
+import { HelpButton } from "@/app/components/ui-next";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -88,7 +89,6 @@ export function MaterialsView({
         headingLevel={2}
         titleId="materials-title"
         title={translate(locale, "materials.title")}
-        description={translate(locale, "materials.description")}
         actions={
           canCreateMaterial ? (
             <Button type="button" variant="primary" onClick={() => setIsOpen(true)}>
@@ -101,7 +101,6 @@ export function MaterialsView({
       {materials.length === 0 ? (
         <EmptyState
           title={translate(locale, "materials.emptyTitle")}
-          description={translate(locale, "materials.emptyDescription")}
           action={
             canCreateMaterial ? (
               <Button type="button" variant="primary" onClick={() => setIsOpen(true)}>
@@ -182,7 +181,12 @@ export function MaterialsView({
         open={isOpen}
         onClose={() => setIsOpen(false)}
         title={translate(locale, "materials.create.title")}
-        description={translate(locale, "panel.materialHelp")}
+        headerActions={
+          <HelpButton
+            locale={locale}
+            messageKeys={["panel.materialHelp", "materials.field.fileHelp"]}
+          />
+        }
         closeLabel={translate(locale, "common.close")}
       >
         <form
@@ -207,9 +211,6 @@ export function MaterialsView({
               type="file"
               className="text-sm file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-ui-surface-muted file:text-ui-text hover:file:cursor-pointer"
             />
-            <small className="text-xs text-ui-text-muted">
-              {translate(locale, "materials.field.fileHelp")}
-            </small>
           </label>
           <details className="ui-next-panel-options">
             <summary>{translate(locale, "panel.optional")}</summary>

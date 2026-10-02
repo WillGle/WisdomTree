@@ -18,4 +18,4 @@ export * from "./typography/markdown-view";
 export * from "./activities-tasks/task-dialog";
 export * from "./activities-tasks/task-kpis";
 
-
+export { HelpButton } from "./overlays/help-button";

@@ -414,3 +414,82 @@
     padding: var(--ui-space-4);
   }
 }
+
+/* Project modules share one frame; guidance is opened only on request. */
+.ui-next-project-module-frame
+  > :is(
+    .ui-next-notes-page,
+    .ui-next-materials-page,
+    .ui-next-work-page,
+    .ui-next-library,
+    .ui-next-project-module,
+    .ui-next-governance
+  ) {
+  display: grid;
+  gap: var(--ui-space-6);
+  inline-size: 100%;
+  max-inline-size: none;
+  margin: 0;
+  padding: 0;
+}
+
+.ui-next-project-module-frame
+  > :is(
+    .ui-next-notes-page,
+    .ui-next-materials-page,
+    .ui-next-work-page,
+    .ui-next-library,
+    .ui-next-project-module,
+    .ui-next-governance
+  )
+  > .ui-next-page-header {
+  margin: 0;
+}
+
+.ui-next-project-module-frame
+  > :is(
+    .ui-next-notes-page,
+    .ui-next-materials-page,
+    .ui-next-work-page,
+    .ui-next-library,
+    .ui-next-project-module,
+    .ui-next-governance
+  )
+  > .ui-next-page-header
+  h2 {
+  margin: 0;
+  font-size: var(--ui-font-size-lg);
+}
+
+.ui-next-project-help {
+  display: grid;
+  gap: var(--ui-space-4);
+  overflow-wrap: anywhere;
+}
+
+.ui-next-project-help p,
+.ui-next-project-help h3 {
+  margin: 0;
+}
+
+.ui-next-project-help section {
+  display: grid;
+  gap: var(--ui-space-2);
+}
+
+@media (max-width: 64rem) {
+  .ui-next-project-header__identity {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+  .ui-next-project-header__identity > label {
+    grid-column: 1 / -1;
+  }
+  .ui-next-project-header__badges {
+    grid-column: 2;
+    grid-row: 2;
+  }
+}
+
+.ui-next-research-home__columns:has(> section:only-child) {
+  grid-template-columns: minmax(0, 1fr);
+}

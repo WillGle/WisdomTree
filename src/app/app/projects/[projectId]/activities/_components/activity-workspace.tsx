@@ -1,5 +1,6 @@
 "use client";
 
+import { HelpButton } from "@/app/components/ui-next";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -290,10 +291,7 @@ export function ActivityWorkspace({
               ))}
             </ul>
           ) : (
-            <EmptyState
-              title={translate(locale, "activities.tasksEmpty")}
-              description={translate(locale, "activities.tasksHelp")}
-            />
+            <EmptyState title={translate(locale, "activities.tasksEmpty")} />
           )}
         </section>
       </div>
@@ -325,7 +323,7 @@ export function ActivityWorkspace({
         open={editOpen}
         onClose={() => setEditOpen(false)}
         title={translate(locale, "activities.editTitle")}
-        description={translate(locale, "panel.activityHelp")}
+        headerActions={<HelpButton locale={locale} messageKeys={["panel.activityHelp"]} />}
         closeLabel={translate(locale, "common.close")}
       >
         <form id="edit-activity" className="ui-next-work-form" onSubmit={saveActivity}>
@@ -375,7 +373,7 @@ export function ActivityWorkspace({
         open={Boolean(contextOpen)}
         onClose={() => setContextOpen(null)}
         title={contextOpen ? translate(locale, `activities.add.${contextOpen}`) : ""}
-        description={translate(locale, "panel.activityLinks")}
+        headerActions={<HelpButton locale={locale} messageKeys={["panel.activityLinks"]} />}
         closeLabel={translate(locale, "common.close")}
       >
         <form id="activity-context-form" className="ui-next-work-form" onSubmit={addContext}>

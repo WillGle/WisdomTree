@@ -1,5 +1,6 @@
 "use client";
 
+import { HelpButton } from "@/app/components/ui-next";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { UiLocale } from "@/modules/auth/profile";
@@ -111,7 +112,7 @@ export function NotesView({
         open={createOpen}
         onClose={() => setCreateOpen(false)}
         title={translate(locale, "notes.create.title")}
-        description={translate(locale, "panel.noteHelp")}
+        headerActions={<HelpButton locale={locale} messageKeys={["panel.noteHelp"]} />}
         closeLabel={translate(locale, "common.close")}
       >
         <Stack as="form" gap="4" id="create-note" onSubmit={handleCreate}>

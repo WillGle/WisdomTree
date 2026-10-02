@@ -174,7 +174,6 @@ export function TasksView({
         headingLevel={2}
         titleId="tasks-title"
         title={translate(locale, "tasks.title")}
-        description={translate(locale, "tasks.description")}
         actions={
           canCreate ? (
             <Button
@@ -282,7 +281,6 @@ export function TasksView({
       ) : (
         <EmptyState
           title={translate(locale, "tasks.emptyTitle")}
-          description={translate(locale, "tasks.emptyDescription")}
           action={
             canCreate ? (
               <Button type="button" variant="primary" onClick={() => setOpen(true)}>

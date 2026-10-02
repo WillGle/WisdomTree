@@ -68,10 +68,13 @@ export function Dialog({
         }
       }}
       onCancel={(event) => {
+        // A nested help dialog must not dismiss the form underneath it.
+        if (event.target !== event.currentTarget) return;
         event.preventDefault();
         handleClose();
       }}
-      onClose={() => {
+      onClose={(event) => {
+        if (event.target !== event.currentTarget) return;
         if (open) onClose();
         requestAnimationFrame(() => restoreFocusRef.current?.focus());
       }}

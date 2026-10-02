@@ -294,7 +294,6 @@ export function NoteWorkspace({
             className="ui-next-research-context"
             aria-label={translate(locale, "journey.reviewEvidence")}
           >
-            <p>{translate(locale, isDraft ? "journey.draftHelp" : "journey.sharedHelp")}</p>
             <div className="ui-next-research-actions">
               {canEditDraft ? (
                 <Button type="button" variant="secondary" onClick={handleOpenEvidencePicker}>

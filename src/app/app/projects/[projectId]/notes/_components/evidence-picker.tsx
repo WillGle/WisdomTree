@@ -1,5 +1,6 @@
 "use client";
 
+import { HelpButton } from "@/app/components/ui-next";
 import { useEffect, useState, useTransition } from "react";
 import type { UiLocale } from "@/modules/auth/profile";
 import { Button, Dialog, StatusBadge, translate } from "@/app/components/ui-next";
@@ -203,7 +204,12 @@ export function EvidencePicker({
       open={open}
       onClose={handleClose}
       title={translate(locale, "notes.evidence.add")}
-      description={translate(locale, selectedItem ? "panel.evidenceVersion" : "panel.evidenceFind")}
+      headerActions={
+        <HelpButton
+          locale={locale}
+          messageKeys={[selectedItem ? "panel.evidenceVersion" : "panel.evidenceFind"]}
+        />
+      }
       closeLabel={translate(locale, "notes.evidence.closePicker")}
     >
       <div className="ui-next-evidence-picker">

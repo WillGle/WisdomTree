@@ -1,6 +1,5 @@
 import type { ReactNode } from "react";
 import { PageContainer } from "../../../components/ui-next";
-import { ResearchGuide } from "./_components/research-guide";
 import { ProjectHeader } from "./_components/project-header";
 import { ProjectNavigation } from "./_components/project-navigation";
 import { getProjectWorkspaceContext } from "./_lib/workspace-context";
@@ -30,7 +29,6 @@ export default async function ProjectWorkspaceLayout({
           canEditProject={workspace.project.capabilities.canEditProject}
         />
         <div className="ui-next-project-workspace__content grid gap-6 min-w-0">
-          <ResearchGuide projectId={projectId} locale={application.locale} />
           <div className="ui-next-project-module-frame grid gap-6 min-w-0">{children}</div>
         </div>
       </div>

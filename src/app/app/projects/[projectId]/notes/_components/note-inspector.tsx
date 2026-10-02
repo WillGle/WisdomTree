@@ -1,5 +1,6 @@
 "use client";
 
+import { HelpButton } from "@/app/components/ui-next";
 import { useState } from "react";
 import Link from "next/link";
 import type { UiLocale } from "@/modules/auth/profile";
@@ -339,7 +340,7 @@ export function NoteInspectorContent({
           <h4 className="ui-next-note-inspector__section-title">
             {translate(locale, "notes.inspector.publication")}
           </h4>
-          <p className="ui-next-panel-help">{translate(locale, "panel.publicHelp")}</p>
+          <HelpButton locale={locale} messageKeys={["panel.publicHelp"]} />
           <div className="ui-next-note-inspector__meta-item">
             <span className="ui-next-note-inspector__meta-label">
               {translate(locale, "notes.inspector.publication")}

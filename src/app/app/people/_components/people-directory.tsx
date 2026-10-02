@@ -1,5 +1,6 @@
 "use client";
 
+import { HelpButton } from "@/app/components/ui-next";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -97,7 +98,6 @@ export function PeopleDirectory({
         <PageHeader
           headingLevel={2}
           title={translate(locale, "nav.people")}
-          description={translate(locale, "people.projectDescription")}
           actions={items.length && canCreate && projectId ? createAction : null}
         />
       ) : (
@@ -220,7 +220,12 @@ export function PeopleDirectory({
           open={createOpen}
           onClose={() => setCreateOpen(false)}
           title={translate(locale, "people.new")}
-          description={translate(locale, "panel.personHelp")}
+          description={!isProjectDirectory ? translate(locale, "panel.personHelp") : undefined}
+          headerActions={
+            isProjectDirectory ? (
+              <HelpButton locale={locale} messageKeys={["panel.personHelp"]} />
+            ) : undefined
+          }
           closeLabel={translate(locale, "common.close")}
         >
           {createOpen ? (

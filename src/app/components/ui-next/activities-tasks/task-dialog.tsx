@@ -1,5 +1,6 @@
 "use client";
 
+import { HelpButton } from "../overlays/help-button";
 import { useEffect, useId, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { UiLocale } from "@/modules/auth/profile";
@@ -364,7 +365,15 @@ export function UnifiedTaskDialog({
             : translate(locale, "tasks.edit.title")
           : translate(locale, "tasks.create.title")
       }
-      description={translate(locale, readOnly ? "panel.taskReadOnly" : "panel.taskHelp")}
+      headerActions={
+        <HelpButton
+          locale={locale}
+          messageKeys={[
+            readOnly ? "panel.taskReadOnly" : "panel.taskHelp",
+            "panel.taskPlanningHelp",
+          ]}
+        />
+      }
       closeLabel={translate(locale, "common.close")}
       footer={
         <div className="ui-next-notion-task__actions">
@@ -645,7 +654,6 @@ export function UnifiedTaskDialog({
           onToggle={(event) => setPlanningOpen(event.currentTarget.open)}
         >
           <summary>{translate(locale, "panel.taskPlanning")}</summary>
-          <p>{translate(locale, "panel.taskPlanningHelp")}</p>
           <div className="ui-next-notion-task__properties">
             {/* Sprint / Cycle Property */}
             <div className="ui-next-notion-property">

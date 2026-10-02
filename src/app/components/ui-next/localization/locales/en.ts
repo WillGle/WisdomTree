@@ -1,6 +1,7 @@
 import type { viMessages } from "./vi";
 
 export const enMessages: Record<keyof typeof viMessages, string> = {
+  "common.help": "Help",
   "nav.vaults": "Vaults",
   "vault.title": "Vaults",
   "vault.description": "Store your notes and resources, or collaborate in a shared vault.",

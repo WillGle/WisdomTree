@@ -318,11 +318,6 @@ export function MaterialDetail({
         </StatusBadge>
       </header>
 
-      <div className="ui-next-research-context">
-        <strong>{translate(locale, "journey.sourcesNext")}</strong>
-        <p>{translate(locale, "journey.sourcesNextHelp")}</p>
-      </div>
-
       {canManageMaterial ? (
         <form className="ui-next-material-version-form" onSubmit={uploadVersion}>
           <label>
@@ -523,7 +518,6 @@ export function MaterialDetail({
       {canManagePhysical || material.physical ? (
         <section className="ui-next-material-panel" aria-labelledby="material-physical-title">
           <h3 id="material-physical-title">{translate(locale, "materials.physical.title")}</h3>
-          <p>{translate(locale, "materials.physical.description")}</p>
           {material.physical ? (
             <p className="ui-next-material-detail__meta">
               {material.physical.itemCode} · {material.physical.availableCopies}/
@@ -579,7 +573,6 @@ export function MaterialDetail({
 
       <section className="ui-next-material-panel" aria-labelledby="material-lineage-title">
         <h3 id="material-lineage-title">{translate(locale, "materials.lineage.title")}</h3>
-        <p>{translate(locale, "materials.lineage.description")}</p>
         {material.lineageNotes.length ? (
           <ul className="ui-next-material-lineage" role="list">
             {material.lineageNotes.map((note) => (
