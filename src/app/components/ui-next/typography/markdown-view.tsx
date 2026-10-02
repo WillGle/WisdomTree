@@ -57,6 +57,17 @@ function renderInlines(text: string): ReactNode {
   return inlineTokens(text).map((token, idx) => renderInline(token, idx));
 }
 
+function accessibleInlineText(text: string): string {
+  return inlineTokens(text)
+    .map((token) => {
+      if (token.kind === "wiki" || token.kind === "link") return token.label;
+      if (token.kind === "image") return token.alt;
+      return token.text;
+    })
+    .join("")
+    .trim();
+}
+
 function renderBlock(block: Block, index: number): ReactNode {
   switch (block.type) {
     case "heading": {
@@ -110,7 +121,12 @@ function renderBlock(block: Block, index: number): ReactNode {
           {block.items.map((item: ListItem, itemIdx: number) => (
             <li key={itemIdx}>
               {item.checked !== undefined ? (
-                <input type="checkbox" disabled checked={item.checked} />
+                <input
+                  type="checkbox"
+                  disabled
+                  checked={item.checked}
+                  aria-label={accessibleInlineText(item.text)}
+                />
               ) : null}{" "}
               {renderInlines(item.text)}
             </li>

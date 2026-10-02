@@ -1,4 +1,6 @@
 import assert from "node:assert/strict";
+import * as React from "react";
+import { renderToStaticMarkup } from "react-dom/server";
 import { readFileSync, readdirSync, statSync } from "node:fs";
 import path from "node:path";
 import {
@@ -10,6 +12,7 @@ import {
   viMessages,
 } from "@/app/components/ui-next/localization";
 import { getErrorPresentation } from "@/app/components/ui-next/feedback/error-presentation";
+import { MarkdownView } from "@/app/components/ui-next/typography/markdown-view";
 
 function filesBelow(directory: string): string[] {
   return readdirSync(directory).flatMap((name) => {
@@ -36,12 +39,18 @@ export async function run() {
     "project.overview",
     "project.notes",
     "project.materials",
+    "people.allPeople",
+    "people.noProjects",
   ];
 
   assert.deepEqual(Object.keys(enMessages).sort(), Object.keys(viMessages).sort());
   for (const key of requiredKeys) assert.ok(key in viMessages, `missing VI key: ${key}`);
   assert.equal(translate("unsupported", "nav.projects"), "Dự án");
   assert.equal(translate("en", "nav.projects"), "Projects");
+  assert.equal(translate("vi", "people.allPeople"), "Tất cả hồ sơ người");
+  assert.equal(translate("en", "people.allPeople"), "All people");
+  assert.equal(translate("vi", "people.noProjects"), "Hồ sơ này chưa được liên kết với Dự án nào.");
+  assert.equal(translate("en", "people.noProjects"), "This record is not linked to any Project.");
   assert.equal(formatUiNumber(1234.5, "vi"), "1.234,5");
   assert.equal(
     formatUiDate("2026-07-21T20:30:00Z", "en", {
@@ -59,6 +68,28 @@ export async function run() {
   const unicode = "Huế — 漢文 — 日本語 — 한국어 — العربية — 𠀀";
   assert.equal(interpolateMessage("{value}", { value: unicode }), unicode);
   assert.equal(translate("en", "common.nameExample", { name: unicode }), `Item: ${unicode}`);
+
+  const taskList = (() => {
+    const testGlobals = globalThis as typeof globalThis & { React?: typeof React };
+    const previousReact = testGlobals.React;
+    testGlobals.React = React;
+    try {
+      return renderToStaticMarkup(
+        React.createElement(MarkdownView, {
+          content: "- [x] Supporting **strong evidence** and [source](https://example.test)",
+        }),
+      );
+    } finally {
+      if (previousReact) testGlobals.React = previousReact;
+      else Reflect.deleteProperty(testGlobals, "React");
+    }
+  })();
+  assert.match(
+    taskList,
+    /<input type="checkbox"[^>]*aria-label="Supporting strong evidence and source"/,
+  );
+  assert.match(taskList, /<strong>strong evidence<\/strong>/);
+  assert.match(taskList, /<a href="https:\/\/example\.test"[^>]*>source<\/a>/);
 
   const root = path.resolve("src/app/components/ui-next");
   const source = filesBelow(root)
