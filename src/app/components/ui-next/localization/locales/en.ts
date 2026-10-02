@@ -17,6 +17,7 @@ export const enMessages: Record<keyof typeof viMessages, string> = {
   "vault.settings": "Manage vault",
   "vault.private": "Only the owner and members have access.",
   "vault.notes": "Notes",
+  "vault.textResource": "Text",
   "vault.resources": "Resources",
   "vault.drafts": "My drafts",
   "vault.noNotes": "No notes yet.",
@@ -32,8 +33,7 @@ export const enMessages: Record<keyof typeof viMessages, string> = {
   "vault.noProjects": "No linked projects yet.",
   "vault.chooseProject": "Choose project",
   "vault.linkHelp": "Links help you find resources; vault access is managed separately.",
-  "vault.contentHelp":
-    "This page lists notes and resources. Vault reading and editing will follow in the next phase.",
+  "vault.contentHelp": "Notes, your private drafts, and resources in this vault.",
   "vault.saved": "Saved.",
   "vault.save": "Save changes",
   "vault.close": "Close",

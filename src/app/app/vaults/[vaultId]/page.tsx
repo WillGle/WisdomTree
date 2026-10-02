@@ -21,6 +21,8 @@ import { getAppRequestContext } from "../../_lib/request-context";
 import { VaultRetry } from "../_components/vault-list";
 import { VaultSettings } from "./_components/vault-settings";
 
+import styles from "../vault.module.css";
+
 export default async function VaultPage({ params }: { params: Promise<{ vaultId: string }> }) {
   const { vaultId } = await params;
   const { actor, application, projects } = await getAppRequestContext();
@@ -36,7 +38,7 @@ export default async function VaultPage({ params }: { params: Promise<{ vaultId:
     ]);
     return (
       <PageContainer>
-        <Stack>
+        <Stack gap="4">
           <Link href="/app/vaults">← {translate(locale, "vault.title")}</Link>
           <PageHeader
             title={vault.name}
@@ -54,16 +56,16 @@ export default async function VaultPage({ params }: { params: Promise<{ vaultId:
               ) : undefined
             }
           />
-          <p>
+          <p className={styles.copy}>
             {translate(locale, `vault.${vault.role}`)} · {translate(locale, "vault.private")}
           </p>
-          <p className="text-ui-text-secondary">{translate(locale, "vault.contentHelp")}</p>
-          <Surface className="p-4">
+          <p className={styles.secondary}>{translate(locale, "vault.contentHelp")}</p>
+          <Surface className={styles.content}>
             <h2>{translate(locale, "vault.notes")}</h2>
             {content.notes.length ? (
               <ul>
                 {content.notes.map((note) => (
-                  <li key={note.id} className="break-words">
+                  <li key={note.id} className={styles.title}>
                     {note.title}
                   </li>
                 ))}
@@ -72,14 +74,18 @@ export default async function VaultPage({ params }: { params: Promise<{ vaultId:
               <p>{translate(locale, "vault.noNotes")}</p>
             )}
           </Surface>
-          <Surface className="p-4">
+          <Surface className={styles.content}>
             <h2>{translate(locale, "vault.resources")}</h2>
             {resources.length ? (
               <ul>
                 {resources.map((resource) => (
-                  <li key={resource.id} className="break-words">
+                  <li key={resource.id} className={styles.title}>
                     {resource.title}
-                    {resource.mimeType ? ` · ${resource.mimeType}` : ""}
+                    {resource.mimeType === "application/pdf"
+                      ? " · PDF"
+                      : resource.mimeType?.startsWith("text/")
+                        ? ` · ${translate(locale, "vault.textResource")}`
+                        : ""}
                   </li>
                 ))}
               </ul>
@@ -87,12 +93,12 @@ export default async function VaultPage({ params }: { params: Promise<{ vaultId:
               <p>{translate(locale, "vault.noResources")}</p>
             )}
           </Surface>
-          <Surface className="p-4">
+          <Surface className={styles.content}>
             <h2>{translate(locale, "vault.drafts")}</h2>
             {content.drafts.length ? (
               <ul>
                 {content.drafts.map((draft) => (
-                  <li key={draft.id} className="break-words">
+                  <li key={draft.id} className={styles.title}>
                     {draft.title}
                   </li>
                 ))}
@@ -101,7 +107,7 @@ export default async function VaultPage({ params }: { params: Promise<{ vaultId:
               <p>{translate(locale, "vault.noDrafts")}</p>
             )}
           </Surface>
-          <Surface className="p-4">
+          <Surface className={styles.content}>
             <h2>{translate(locale, "vault.projects")}</h2>
             <p>{translate(locale, "vault.linkHelp")}</p>
             {linkedProjects.length ? (

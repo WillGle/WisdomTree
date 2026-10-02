@@ -17,6 +17,8 @@ import {
   getErrorPresentation,
 } from "../../../components/ui-next";
 
+import styles from "../vault.module.css";
+
 export function VaultRetry({ locale }: { locale: UiLocale }) {
   const router = useRouter();
   return <Button onClick={() => router.refresh()}>{translate(locale, "vault.retry")}</Button>;
@@ -86,17 +88,15 @@ export function VaultList({ vaults, locale }: { vaults: AppVaultDto[]; locale: U
         return (
           <section key={group}>
             <h2>{translate(locale, group === "owner" ? "vault.mine" : "vault.shared")}</h2>
-            <ul className="grid gap-3 m-0 p-0 list-none">
+            <ul className={styles.list}>
               {rows.map((vault) => (
                 <li key={vault.id}>
-                  <Surface className="p-4">
+                  <Surface className={styles.content}>
                     <Link href={`/app/vaults/${vault.id}`}>
-                      <strong className="break-words">{vault.name}</strong>
+                      <strong className={styles.title}>{vault.name}</strong>
                     </Link>
-                    {vault.description ? <p className="break-words">{vault.description}</p> : null}
-                    <p className="text-ui-text-secondary">
-                      {translate(locale, `vault.${vault.role}`)}
-                    </p>
+                    {vault.description ? <p className={styles.title}>{vault.description}</p> : null}
+                    <p className={styles.secondary}>{translate(locale, `vault.${vault.role}`)}</p>
                   </Surface>
                 </li>
               ))}

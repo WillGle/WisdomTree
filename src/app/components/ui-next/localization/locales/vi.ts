@@ -15,6 +15,7 @@ export const viMessages = {
   "vault.settings": "Quản lý Vault",
   "vault.private": "Chỉ chủ kho và thành viên được truy cập.",
   "vault.notes": "Ghi chú",
+  "vault.textResource": "Văn bản",
   "vault.resources": "Tư liệu",
   "vault.drafts": "Bản nháp của tôi",
   "vault.noNotes": "Chưa có ghi chú.",
@@ -30,8 +31,7 @@ export const viMessages = {
   "vault.noProjects": "Chưa có dự án liên kết.",
   "vault.chooseProject": "Chọn dự án",
   "vault.linkHelp": "Liên kết giúp tìm lại tư liệu; quyền truy cập Vault vẫn được quản lý riêng.",
-  "vault.contentHelp":
-    "Hiện hiển thị danh mục ghi chú và tư liệu. Trình đọc và chỉnh sửa Vault sẽ được bổ sung ở bước tiếp theo.",
+  "vault.contentHelp": "Danh mục ghi chú, bản nháp riêng và tư liệu trong Vault.",
   "vault.saved": "Đã lưu.",
   "vault.save": "Lưu thay đổi",
   "vault.close": "Đóng",
