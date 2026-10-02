@@ -325,6 +325,7 @@ export function ActivityWorkspace({
         open={editOpen}
         onClose={() => setEditOpen(false)}
         title={translate(locale, "activities.editTitle")}
+        description={translate(locale, "panel.activityHelp")}
         closeLabel={translate(locale, "common.close")}
       >
         <form id="edit-activity" className="ui-next-work-form" onSubmit={saveActivity}>
@@ -353,12 +354,31 @@ export function ActivityWorkspace({
         </form>
       </Dialog>
       <Dialog
+        footer={
+          <div className="ui-next-work-form__actions">
+            <Button type="button" variant="secondary" onClick={() => setContextOpen(null)}>
+              {translate(locale, "common.cancel")}
+            </Button>
+            <Button
+              type="submit"
+              form="activity-context-form"
+              variant="primary"
+              disabled={!options.some((item) => !pickedIds.has(item.id))}
+              loading={saving}
+              loadingLabel={translate(locale, "common.loading")}
+            >
+              {translate(locale, "common.create")}
+            </Button>
+          </div>
+        }
+
         open={Boolean(contextOpen)}
         onClose={() => setContextOpen(null)}
         title={contextOpen ? translate(locale, `activities.add.${contextOpen}`) : ""}
+        description={translate(locale, "panel.activityLinks")}
         closeLabel={translate(locale, "common.close")}
       >
-        <form className="ui-next-work-form" onSubmit={addContext}>
+        <form id="activity-context-form" className="ui-next-work-form" onSubmit={addContext}>
           <label>
             <span>{translate(locale, "activities.field.choose")}</span>
             <select name="id" required defaultValue="">
@@ -380,20 +400,6 @@ export function ActivityWorkspace({
               <input name="roleLabel" maxLength={80} />
             </label>
           ) : null}
-          <div className="ui-next-work-form__actions">
-            <Button type="button" variant="secondary" onClick={() => setContextOpen(null)}>
-              {translate(locale, "common.cancel")}
-            </Button>
-            <Button
-              type="submit"
-              variant="primary"
-              disabled={!options.some((item) => !pickedIds.has(item.id))}
-              loading={saving}
-              loadingLabel={translate(locale, "common.loading")}
-            >
-              {translate(locale, "common.create")}
-            </Button>
-          </div>
         </form>
       </Dialog>
     </section>

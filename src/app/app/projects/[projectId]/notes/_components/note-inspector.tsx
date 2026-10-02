@@ -141,101 +141,6 @@ export function NoteInspectorContent({
   return (
     <>
       <section className="ui-next-note-inspector__section">
-        <h4 className="ui-next-note-inspector__section-title">
-          {translate(locale, "notes.inspector.context")}
-        </h4>
-        <div className="ui-next-note-inspector__meta-item">
-          <span className="ui-next-note-inspector__meta-label">
-            {translate(locale, "nav.projects")}
-          </span>
-          <span>{projectName}</span>
-        </div>
-        <div className="ui-next-note-inspector__meta-item">
-          <span className="ui-next-note-inspector__meta-label">
-            {translate(locale, "notes.inspector.title")}
-          </span>
-          <StatusBadge tone={isDraft ? "information" : "neutral"}>
-            {translate(locale, isDraft ? "notes.state.new_draft" : "notes.state.official")}
-          </StatusBadge>
-        </div>
-        <div className="ui-next-note-inspector__meta-item">
-          <span className="ui-next-note-inspector__meta-label">
-            {translate(locale, "notes.purpose.label")}
-          </span>
-          {researchPurpose ? (
-            <StatusBadge tone={purposeTones[researchPurpose]}>
-              {translate(locale, `notes.purpose.${researchPurpose}`)}
-            </StatusBadge>
-          ) : (
-            <span className="ui-next-muted">{translate(locale, "notes.purpose.unspecified")}</span>
-          )}
-        </div>
-      </section>
-
-      <section className="ui-next-note-inspector__section">
-        <h4 className="ui-next-note-inspector__section-title">
-          {translate(locale, "notes.inspector.metadata")}
-        </h4>
-        {officialVersion !== undefined && officialVersion !== null ? (
-          <div className="ui-next-note-inspector__meta-item">
-            <span className="ui-next-note-inspector__meta-label">
-              {translate(locale, "notes.inspector.officialVersion")}
-            </span>
-            <span>v{officialVersion}</span>
-          </div>
-        ) : null}
-        <div className="ui-next-note-inspector__meta-item">
-          <span className="ui-next-note-inspector__meta-label">
-            {isDraft
-              ? translate(locale, "notes.inspector.draftVersion")
-              : translate(locale, "notes.inspector.version")}
-          </span>
-          <span>v{version}</span>
-        </div>
-        {tags && tags.length > 0 ? (
-          <div className="ui-next-note-inspector__meta-item">
-            <span className="ui-next-note-inspector__meta-label">Tags</span>
-            <span>{tags.join(", ")}</span>
-          </div>
-        ) : null}
-      </section>
-
-      {publication ? (
-        <section className="ui-next-note-inspector__section">
-          <h4 className="ui-next-note-inspector__section-title">
-            {translate(locale, "notes.inspector.publication")}
-          </h4>
-          <div className="ui-next-note-inspector__meta-item">
-            <span className="ui-next-note-inspector__meta-label">
-              {translate(locale, "notes.inspector.publication")}
-            </span>
-            <StatusBadge tone={publicationTones[publication.state]}>
-              {translate(locale, `notes.publication.${publication.state}`)}
-            </StatusBadge>
-          </div>
-          {publication.slug ? (
-            <div className="ui-next-note-inspector__meta-item">
-              <span className="ui-next-note-inspector__meta-label">
-                {translate(locale, "notes.publication.publicUrl")}
-              </span>
-              <Link href={`/p/${publication.slug}`} className="ui-next-note-inspector__url">
-                /p/{publication.slug}
-              </Link>
-            </div>
-          ) : null}
-          {canPublish && projectId && noteId && onPublicationUpdated ? (
-            <PublicationActions
-              locale={locale}
-              projectId={projectId}
-              noteId={noteId}
-              publication={publication}
-              onPublicationUpdated={onPublicationUpdated}
-            />
-          ) : null}
-        </section>
-      ) : null}
-
-      <section className="ui-next-note-inspector__section">
         <div className="ui-next-note-inspector__section-header">
           <h4 className="ui-next-note-inspector__section-title">
             {translate(locale, "notes.evidence.title")}
@@ -369,6 +274,101 @@ export function NoteInspectorContent({
           )}
         </section>
       ) : null}
+      <section className="ui-next-note-inspector__section">
+        <h4 className="ui-next-note-inspector__section-title">
+          {translate(locale, "notes.inspector.context")}
+        </h4>
+        <div className="ui-next-note-inspector__meta-item">
+          <span className="ui-next-note-inspector__meta-label">
+            {translate(locale, "nav.projects")}
+          </span>
+          <span>{projectName}</span>
+        </div>
+        <div className="ui-next-note-inspector__meta-item">
+          <span className="ui-next-note-inspector__meta-label">
+            {translate(locale, "notes.inspector.title")}
+          </span>
+          <StatusBadge tone={isDraft ? "information" : "neutral"}>
+            {translate(locale, isDraft ? "notes.state.new_draft" : "notes.state.official")}
+          </StatusBadge>
+        </div>
+        <div className="ui-next-note-inspector__meta-item">
+          <span className="ui-next-note-inspector__meta-label">
+            {translate(locale, "notes.purpose.label")}
+          </span>
+          {researchPurpose ? (
+            <StatusBadge tone={purposeTones[researchPurpose]}>
+              {translate(locale, `notes.purpose.${researchPurpose}`)}
+            </StatusBadge>
+          ) : (
+            <span className="ui-next-muted">{translate(locale, "notes.purpose.unspecified")}</span>
+          )}
+        </div>
+      </section>
+
+      <section className="ui-next-note-inspector__section">
+        <h4 className="ui-next-note-inspector__section-title">
+          {translate(locale, "notes.inspector.metadata")}
+        </h4>
+        {officialVersion !== undefined && officialVersion !== null ? (
+          <div className="ui-next-note-inspector__meta-item">
+            <span className="ui-next-note-inspector__meta-label">
+              {translate(locale, "notes.inspector.officialVersion")}
+            </span>
+            <span>v{officialVersion}</span>
+          </div>
+        ) : null}
+        <div className="ui-next-note-inspector__meta-item">
+          <span className="ui-next-note-inspector__meta-label">
+            {isDraft
+              ? translate(locale, "notes.inspector.draftVersion")
+              : translate(locale, "notes.inspector.version")}
+          </span>
+          <span>v{version}</span>
+        </div>
+        {tags && tags.length > 0 ? (
+          <div className="ui-next-note-inspector__meta-item">
+            <span className="ui-next-note-inspector__meta-label">Tags</span>
+            <span>{tags.join(", ")}</span>
+          </div>
+        ) : null}
+      </section>
+
+      {publication ? (
+        <section className="ui-next-note-inspector__section">
+          <h4 className="ui-next-note-inspector__section-title">
+            {translate(locale, "notes.inspector.publication")}
+          </h4>
+          <p className="ui-next-panel-help">{translate(locale, "panel.publicHelp")}</p>
+          <div className="ui-next-note-inspector__meta-item">
+            <span className="ui-next-note-inspector__meta-label">
+              {translate(locale, "notes.inspector.publication")}
+            </span>
+            <StatusBadge tone={publicationTones[publication.state]}>
+              {translate(locale, `notes.publication.${publication.state}`)}
+            </StatusBadge>
+          </div>
+          {publication.slug ? (
+            <div className="ui-next-note-inspector__meta-item">
+              <span className="ui-next-note-inspector__meta-label">
+                {translate(locale, "notes.publication.publicUrl")}
+              </span>
+              <Link href={`/p/${publication.slug}`} className="ui-next-note-inspector__url">
+                /p/{publication.slug}
+              </Link>
+            </div>
+          ) : null}
+          {canPublish && projectId && noteId && onPublicationUpdated ? (
+            <PublicationActions
+              locale={locale}
+              projectId={projectId}
+              noteId={noteId}
+              publication={publication}
+              onPublicationUpdated={onPublicationUpdated}
+            />
+          ) : null}
+        </section>
+      ) : null}
     </>
   );
 }
@@ -440,6 +440,30 @@ function PublicationActions({
         </Button>
       ) : null}
       <Dialog
+        footer={
+          <div className="ui-next-note-inspector__publication-dialog-actions">
+            <Button
+              type="button"
+              variant="secondary"
+              disabled={pending}
+              onClick={() => setIntent(null)}
+            >
+              {translate(locale, "common.cancel")}
+            </Button>
+            <Button
+              type="button"
+              variant={intent === "unpublish" ? "danger" : "primary"}
+              loading={pending}
+              loadingLabel={translate(locale, "common.loading")}
+              onClick={submit}
+            >
+              {intent === "unpublish"
+                ? translate(locale, "notes.publication.confirmUnpublish")
+                : translate(locale, "notes.publication.confirmPublish")}
+            </Button>
+          </div>
+        }
+
         open={intent !== null}
         onClose={() => {
           if (!pending) setIntent(null);
@@ -476,27 +500,6 @@ function PublicationActions({
             {error}
           </p>
         ) : null}
-        <div className="ui-next-note-inspector__publication-dialog-actions">
-          <Button
-            type="button"
-            variant="secondary"
-            disabled={pending}
-            onClick={() => setIntent(null)}
-          >
-            {translate(locale, "common.cancel")}
-          </Button>
-          <Button
-            type="button"
-            variant={intent === "unpublish" ? "danger" : "primary"}
-            loading={pending}
-            loadingLabel={translate(locale, "common.loading")}
-            onClick={submit}
-          >
-            {intent === "unpublish"
-              ? translate(locale, "notes.publication.confirmUnpublish")
-              : translate(locale, "notes.publication.confirmPublish")}
-          </Button>
-        </div>
       </Dialog>
     </div>
   );
@@ -541,7 +544,7 @@ export function NoteInspector(props: NoteInspectorProps) {
       <Drawer
         open={props.open}
         onClose={props.onClose}
-        title={translate(props.locale, "notes.inspector.title")}
+        title={translate(props.locale, "journey.reviewEvidence")}
         closeLabel={translate(props.locale, "common.close")}
       >
         <div className="ui-next-note-inspector ui-next-note-inspector--drawer">

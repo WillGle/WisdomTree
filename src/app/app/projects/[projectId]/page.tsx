@@ -44,7 +44,6 @@ export default async function AppProjectOverviewPage({
   return (
     <div className="ui-next-research-home">
       <section className="ui-next-research-intro" aria-labelledby="research-home-title">
-        <p className="ui-next-research-eyebrow">{translate(locale, "journey.projectHome")}</p>
         <h2 id="research-home-title">{translate(locale, "journey.title")}</h2>
         <p>{translate(locale, "journey.description")}</p>
       </section>
@@ -53,7 +52,7 @@ export default async function AppProjectOverviewPage({
           [
             { key: "collect", help: "collectHelp", module: "materials", action: "openSources" },
             { key: "write", help: "writeHelp", module: "notes", action: "openNotes" },
-            { key: "share", help: "shareHelp", module: "notes", action: "reviewEvidence" },
+            { key: "share", help: "shareHelp", module: "notes", action: "openNotes" },
           ] as const
         )
           .filter((step) => workspace.modules[step.module])
@@ -73,7 +72,6 @@ export default async function AppProjectOverviewPage({
       <div className="ui-next-research-home__columns">
         <section className="ui-next-research-panel" aria-labelledby="research-drafts-title">
           <h2 id="research-drafts-title">{translate(locale, "journey.resume")}</h2>
-          <p>{translate(locale, "journey.resumeHelp")}</p>
           {drafts.length ? (
             <ul className="ui-next-research-resume">
               {drafts.map((draft) => (
@@ -93,18 +91,23 @@ export default async function AppProjectOverviewPage({
             </ul>
           ) : (
             <div className="ui-next-research-empty">
-              <h3>{translate(locale, "journey.draftsEmpty")}</h3>
               <p>{translate(locale, "journey.draftsEmptyHelp")}</p>
             </div>
           )}
           <div className="ui-next-research-actions">
             {workspace.project.capabilities.canCreateNote ? (
-              <Link className="ui-next-research-action" href={`${base}/notes?create=1`}>
+              <Link
+                className="ui-next-button ui-next-button--primary"
+                href={`${base}/notes?create=1`}
+              >
                 {translate(locale, "journey.newNote")}
               </Link>
             ) : null}
             {workspace.project.capabilities.canCreateMaterial ? (
-              <Link href={`${base}/materials?create=1`}>
+              <Link
+                className="ui-next-button ui-next-button--secondary"
+                href={`${base}/materials?create=1`}
+              >
                 {translate(locale, "journey.addSource")}
               </Link>
             ) : null}

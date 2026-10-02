@@ -203,6 +203,7 @@ export function EvidencePicker({
       open={open}
       onClose={handleClose}
       title={translate(locale, "notes.evidence.add")}
+      description={translate(locale, selectedItem ? "panel.evidenceVersion" : "panel.evidenceFind")}
       closeLabel={translate(locale, "notes.evidence.closePicker")}
     >
       <div className="ui-next-evidence-picker">

@@ -121,6 +121,7 @@ export function AdminWorkspace({
             if (!pending) setActiveForm(null);
           }}
           title={translate(locale, "admin.createProject")}
+          description={translate(locale, "panel.projectHelp")}
           closeLabel={translate(locale, "common.close")}
           footer={
             <Button
@@ -247,6 +248,7 @@ export function AdminWorkspace({
             if (!pending) setActiveForm(null);
           }}
           title={translate(locale, "admin.grantCore")}
+          description={translate(locale, "admin.coreDescription")}
           closeLabel={translate(locale, "common.close")}
           footer={
             <Button
@@ -361,6 +363,7 @@ export function AdminWorkspace({
             if (!pending) setActiveForm(null);
           }}
           title={translate(locale, "admin.invite")}
+          description={translate(locale, "panel.inviteHelp")}
           closeLabel={translate(locale, "common.close")}
           footer={
             <Button

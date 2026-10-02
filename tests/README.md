@@ -87,3 +87,19 @@ The E2E harness copies `public/` and `.next/static/` into the standalone build
 tree before starting it. `PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH` is optional and
 is intended for environments such as Nix where Chromium is supplied outside
 Playwright's normal browser cache.
+
+`tests/e2e/research-intent.spec.ts` validates persisted research behavior through
+real UI actions and API reads: private draft autosave and isolation, explicit
+Project sharing, exact-version evidence after newer uploads, collapsed planning
+fields, duplicate-free task creation, stale-write rejection, read-only task
+permissions, and Calendar failure/retry. Its 390px/1440px cases also check frame
+alignment and save actions after scrolling a form, then verify the created task.
+Successful responses are real; only the Calendar failure is injected once.
+Screenshots are saved in the Playwright test output directories.
+
+Run it against an isolated seeded database with the same E2E environment as
+above:
+
+```sh
+npm run test:e2e -- research-intent.spec.ts
+```

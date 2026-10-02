@@ -10,7 +10,10 @@ import {
   formatUiDate,
   translate,
 } from "@/app/components/ui-next";
-import { UnifiedTaskDialog, type TaskItem } from "@/app/components/ui-next/activities-tasks/task-dialog";
+import {
+  UnifiedTaskDialog,
+  type TaskItem,
+} from "@/app/components/ui-next/activities-tasks/task-dialog";
 
 export type MyTask = {
   id: string;
@@ -66,9 +69,7 @@ export function MyWorkView({ locale, tasks }: { locale: UiLocale; tasks: MyTask[
       const data = await res.json();
       setTasksState((prev) =>
         prev.map((t) =>
-          t.id === task.id
-            ? { ...t, state: nextState, version: data.task.version }
-            : t,
+          t.id === task.id ? { ...t, state: nextState, version: data.task.version } : t,
         ),
       );
       router.refresh();
@@ -149,7 +150,10 @@ export function MyWorkView({ locale, tasks }: { locale: UiLocale; tasks: MyTask[
       ) : view === "table" ? (
         /* Notion Table View for My Work */
         <div className="ui-next-tasks-table-wrapper">
-          <table className="ui-next-tasks-table" aria-label={translate(locale, "page.myWork.title")}>
+          <table
+            className="ui-next-tasks-table"
+            aria-label={translate(locale, "page.myWork.title")}
+          >
             <thead>
               <tr>
                 <th>{translate(locale, "tasks.title")}</th>
@@ -168,15 +172,11 @@ export function MyWorkView({ locale, tasks }: { locale: UiLocale; tasks: MyTask[
                   <td className="ui-next-tasks-table__title">
                     <strong>{task.title}</strong>
                     {task.activity ? (
-                      <small className="ui-next-tasks-table__sub">
-                        {task.activity.title}
-                      </small>
+                      <small className="ui-next-tasks-table__sub">{task.activity.title}</small>
                     ) : null}
                   </td>
                   <td>
-                    <span className="ui-next-my-work-card__project">
-                      {task.project.name}
-                    </span>
+                    <span className="ui-next-my-work-card__project">{task.project.name}</span>
                   </td>
                   <td>
                     <StatusBadge
@@ -192,7 +192,9 @@ export function MyWorkView({ locale, tasks }: { locale: UiLocale; tasks: MyTask[
                     </StatusBadge>
                   </td>
                   <td>
-                    <span className={`ui-next-priority-pill ui-next-priority-pill--${task.priority || "medium"}`}>
+                    <span
+                      className={`ui-next-priority-pill ui-next-priority-pill--${task.priority || "medium"}`}
+                    >
                       {translate(locale, `tasks.priority.${task.priority || "medium"}`)}
                     </span>
                   </td>
@@ -239,9 +241,7 @@ export function MyWorkView({ locale, tasks }: { locale: UiLocale; tasks: MyTask[
               >
                 <div className="ui-next-my-work-list-main">
                   <span className="ui-next-my-work-card__project">{task.project.name}</span>
-                  <strong className="ui-next-my-work-list-title">
-                    {task.title}
-                  </strong>
+                  <strong className="ui-next-my-work-list-title">{task.title}</strong>
                   {task.activity ? (
                     <small className="ui-next-my-work-card__activity">{task.activity.title}</small>
                   ) : null}
@@ -259,7 +259,9 @@ export function MyWorkView({ locale, tasks }: { locale: UiLocale; tasks: MyTask[
                     {translate(locale, `tasks.state.${task.state}`)}
                   </StatusBadge>
                   {task.priority ? (
-                    <span className={`ui-next-priority-pill ui-next-priority-pill--${task.priority}`}>
+                    <span
+                      className={`ui-next-priority-pill ui-next-priority-pill--${task.priority}`}
+                    >
                       {translate(locale, `tasks.priority.${task.priority}`)}
                     </span>
                   ) : null}
@@ -311,9 +313,7 @@ export function MyWorkView({ locale, tasks }: { locale: UiLocale; tasks: MyTask[
                             }
                           }}
                         >
-                          <span className="ui-next-my-work-card__project">
-                            {task.project.name}
-                          </span>
+                          <span className="ui-next-my-work-card__project">{task.project.name}</span>
                           <h3 className="ui-next-my-work-card__title">{task.title}</h3>
                           {task.activity ? (
                             <span className="ui-next-my-work-card__activity">
@@ -333,7 +333,9 @@ export function MyWorkView({ locale, tasks }: { locale: UiLocale; tasks: MyTask[
                               {translate(locale, `tasks.state.${task.state}`)}
                             </StatusBadge>
                             {task.priority ? (
-                              <span className={`ui-next-priority-pill ui-next-priority-pill--${task.priority}`}>
+                              <span
+                                className={`ui-next-priority-pill ui-next-priority-pill--${task.priority}`}
+                              >
                                 {translate(locale, `tasks.priority.${task.priority}`)}
                               </span>
                             ) : null}
@@ -405,6 +407,7 @@ export function MyWorkView({ locale, tasks }: { locale: UiLocale; tasks: MyTask[
           locale={locale}
           task={dialogTask}
           currentProjectId={dialogTask.projectId}
+          projects={[{ id: dialogTask.projectId, name: editing?.project.name ?? "" }]}
           onUpdated={(updated) => {
             setTasksState((prev) =>
               prev.map((t) =>

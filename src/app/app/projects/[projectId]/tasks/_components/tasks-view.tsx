@@ -44,6 +44,8 @@ type Assignee = { id: string; displayName: string };
 
 export function TasksView({
   projectId,
+  projectName,
+  isPersonal,
   locale,
   tasks: serverTasks,
   activities,
@@ -56,6 +58,8 @@ export function TasksView({
   initialTaskId,
 }: {
   projectId: string;
+  projectName: string;
+  isPersonal: boolean;
   locale: UiLocale;
   tasks: Task[];
   activities: Activity[];
@@ -302,6 +306,7 @@ export function TasksView({
         locale={locale}
         task={editing}
         currentProjectId={projectId}
+        projects={[{ id: projectId, name: projectName, isPersonal }]}
         activities={activities}
         assignees={assignees}
         canManageActivity={canManageActivity}
@@ -332,7 +337,10 @@ export function TasksView({
             version: created.version,
             canEdit: true,
           };
-          setCreatedTasks((current) => [newTask, ...current]);
+          setCreatedTasks((current) => [
+            newTask,
+            ...current.filter((task) => task.id !== newTask.id),
+          ]);
         }}
         onUpdated={(updated) => {
           const updatedTask: Task = {

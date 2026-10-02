@@ -1,4 +1,44 @@
 export const viMessages = {
+  "panel.graphHelp":
+    "Dùng bộ lọc để tập trung vào dự án hoặc chủ đề. Hiển thị thay đổi cách bản đồ trông ra sao; điều chỉnh bố cục là tùy chọn.",
+  "panel.projectHelp":
+    "Đặt tên dự án và câu hỏi nghiên cứu. Sau khi tạo, thêm tư liệu, ghi chú và thành viên dự án.",
+  "panel.inviteHelp":
+    "Tạo tài khoản cho người cộng tác. Hồ sơ người trong nghiên cứu và thành viên dự án được quản lý riêng.",
+
+  "panel.optional": "Thông tin bổ sung",
+  "panel.taskHelp":
+    "Đặt tên công việc tiếp theo, chọn người thực hiện và hạn nếu cần. Bạn có thể bổ sung thông tin kế hoạch sau.",
+  "panel.taskReadOnly":
+    "Bạn có thể xem công việc và thảo luận. Quyền hiện tại không cho phép chỉnh sửa.",
+  "panel.taskPlanning": "Tùy chọn kế hoạch bổ sung",
+  "panel.taskPlanningHelp":
+    "Chỉ dùng khi nhóm của bạn theo dõi công việc theo đợt, loại hoặc ước lượng công sức.",
+  "panel.cycleExample": "Ví dụ: Đợt thực địa tháng 10",
+  "panel.noteHelp":
+    "Đặt tiêu đề cho ý tưởng. Tiếp theo bạn sẽ viết bản nháp riêng và đính kèm tư liệu làm dẫn chứng.",
+  "panel.materialHelp":
+    "Đặt tên tư liệu và thêm tệp nếu có. Tiếp theo bạn có thể xem văn bản và bắt đầu ghi chú.",
+  "panel.activityHelp":
+    "Đặt tên cuộc phỏng vấn, chuyến đi, cuộc họp hoặc hoạt động nghiên cứu khác. Tiếp theo bạn có thể liên kết người, tư liệu, ghi chú và công việc.",
+  "panel.personHelp":
+    "Tạo hồ sơ cho người tham gia nghiên cứu, tác giả hoặc người liên quan. Thao tác này không tạo tài khoản đăng nhập hay cấp quyền dự án.",
+  "panel.evidenceFind":
+    "Tìm tư liệu hoặc ghi chú đã chia sẻ, rồi chọn phiên bản bạn đã dùng. Đính kèm để lưu dẫn chứng có thể truy lại trong bản nháp.",
+  "panel.evidenceVersion":
+    "Chọn đúng phiên bản làm cơ sở cho nhận định. Sau khi đính kèm, bạn sẽ trở lại bản nháp.",
+  "panel.publicHelp":
+    "Công bố công khai cho phép đọc phiên bản ghi chú đã chia sẻ mà không cần đăng nhập. Thay đổi trong bản nháp riêng không được đưa vào.",
+  "panel.deadlineHelp":
+    "Ghi lại mốc dự án hoặc ngày sự kiện. Để giao việc cho người cụ thể, hãy tạo công việc.",
+  "panel.searchHelp":
+    "Tìm trong các dự án bạn có quyền đọc. Mở kết quả để tiếp tục trong dự án gốc.",
+  "panel.activityLinks":
+    "Liên kết bối cảnh cho hoạt động này. Người, tư liệu và ghi chú được liên kết vẫn thuộc dự án này.",
+  "panel.libraryHelp":
+    "Chọn tài liệu, gửi yêu cầu mượn và theo dõi trạng thái tại đây. Yêu cầu cần được duyệt và bàn giao trước khi bắt đầu mượn.",
+  "panel.createHelp": "Chọn việc bạn cần làm. Nội dung mới sẽ thuộc dự án đã chọn.",
+
   "nav.research": "Nghiên cứu",
   "nav.organize": "Lập kế hoạch & cộng tác",
   "nav.tools": "Công cụ & tài khoản",

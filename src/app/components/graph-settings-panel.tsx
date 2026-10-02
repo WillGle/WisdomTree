@@ -59,8 +59,16 @@ const GROUP_COLORS = ["#2f7d62", "#b64a31", "#a97818", "#526fa8", "#855f99"] as 
  * an uncontrolled one would spring back open by itself — the same trap the
  * panel's own disclosure documents below.
  */
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
-  const [open, setOpen] = useState(true);
+function Section({
+  title,
+  children,
+  initiallyOpen = true,
+}: {
+  title: string;
+  children: React.ReactNode;
+  initiallyOpen?: boolean;
+}) {
+  const [open, setOpen] = useState(initiallyOpen);
   return (
     <details className="gp-section" open={open} onToggle={(e) => setOpen(e.currentTarget.open)}>
       <summary>{title}</summary>
@@ -162,6 +170,9 @@ export function GraphSettingsPanel({
           </button>
         </div>
 
+        {locale ? (
+          <p className="ui-next-panel-help">{translate(locale, "panel.graphHelp")}</p>
+        ) : null}
         <Section title={T.graphPanelFilters}>
           <div className="field">
             <label htmlFor={p("term")}>{T.filterByTitle}</label>
@@ -337,7 +348,9 @@ export function GraphSettingsPanel({
           </button>
         </Section>
 
-        <Section title={T.graphPanelForces}>{FORCE_SLIDERS.map(slider)}</Section>
+        <Section title={T.graphPanelForces} initiallyOpen={false}>
+          {FORCE_SLIDERS.map(slider)}
+        </Section>
       </div>
     </details>
   );

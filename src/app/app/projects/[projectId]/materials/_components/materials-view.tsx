@@ -182,7 +182,7 @@ export function MaterialsView({
         open={isOpen}
         onClose={() => setIsOpen(false)}
         title={translate(locale, "materials.create.title")}
-        description={translate(locale, "materials.create.description")}
+        description={translate(locale, "panel.materialHelp")}
         closeLabel={translate(locale, "common.close")}
       >
         <form
@@ -201,14 +201,6 @@ export function MaterialsView({
             />
           </label>
           <label className="flex flex-col gap-1.5 text-sm font-medium text-ui-text">
-            <span>{translate(locale, "materials.field.description")}</span>
-            <textarea
-              name="description"
-              rows={3}
-              className="rounded-md border border-ui-border bg-ui-surface px-3 py-1.5 text-sm text-ui-text outline-none focus:border-ui-focus focus:ring-1 focus:ring-ui-focus"
-            />
-          </label>
-          <label className="flex flex-col gap-1.5 text-sm font-medium text-ui-text">
             <span>{translate(locale, "materials.field.file")}</span>
             <input
               name="file"
@@ -219,6 +211,17 @@ export function MaterialsView({
               {translate(locale, "materials.field.fileHelp")}
             </small>
           </label>
+          <details className="ui-next-panel-options">
+            <summary>{translate(locale, "panel.optional")}</summary>
+            <label className="flex flex-col gap-1.5 text-sm font-medium text-ui-text">
+              <span>{translate(locale, "materials.field.description")}</span>
+              <textarea
+                name="description"
+                rows={3}
+                className="rounded-md border border-ui-border bg-ui-surface px-3 py-1.5 text-sm text-ui-text outline-none focus:border-ui-focus focus:ring-1 focus:ring-ui-focus"
+              />
+            </label>
+          </details>
           {error ? (
             <p
               className="ui-next-material-form__error m-0 text-sm text-ui-danger font-medium"

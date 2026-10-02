@@ -518,14 +518,7 @@ export function NoteEditor({
       </div>
 
       <Dialog
-        open={showConflictDialog}
-        onClose={() => setShowConflictDialog(false)}
-        title={translate(locale, "notes.conflict.title")}
-        description={translate(locale, "notes.conflict.description")}
-        closeLabel={translate(locale, "notes.conflict.dismiss")}
-      >
-        <div className="ui-next-conflict-dialog">
-          <p>{translate(locale, "notes.conflict.description")}</p>
+        footer={
           <div className="ui-next-conflict-dialog__actions">
             <Button type="button" variant="secondary" onClick={handleCopyContent}>
               {copied
@@ -536,6 +529,16 @@ export function NoteEditor({
               {translate(locale, "notes.conflict.reload")}
             </Button>
           </div>
+        }
+
+        open={showConflictDialog}
+        onClose={() => setShowConflictDialog(false)}
+        title={translate(locale, "notes.conflict.title")}
+        description={translate(locale, "notes.conflict.description")}
+        closeLabel={translate(locale, "notes.conflict.dismiss")}
+      >
+        <div className="ui-next-conflict-dialog">
+          <p>{translate(locale, "notes.conflict.description")}</p>
         </div>
       </Dialog>
     </div>

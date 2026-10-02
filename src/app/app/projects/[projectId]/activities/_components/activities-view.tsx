@@ -170,6 +170,7 @@ export function ActivitiesView({
         open={open}
         onClose={() => setOpen(false)}
         title={translate(locale, "activities.create.title")}
+        description={translate(locale, "panel.activityHelp")}
         closeLabel={translate(locale, "common.close")}
       >
         <form
@@ -187,22 +188,27 @@ export function ActivitiesView({
               className="min-h-[2.5rem] rounded-md border border-ui-border bg-ui-surface px-3 py-1.5 text-sm text-ui-text outline-none focus:border-ui-focus focus:ring-1 focus:ring-ui-focus"
             />
           </label>
-          <label className="flex flex-col gap-1.5 text-sm font-medium text-ui-text">
-            <span>{translate(locale, "activities.field.type")}</span>
-            <input
-              name="type"
-              maxLength={80}
-              className="min-h-[2.5rem] rounded-md border border-ui-border bg-ui-surface px-3 py-1.5 text-sm text-ui-text outline-none focus:border-ui-focus focus:ring-1 focus:ring-ui-focus"
-            />
-          </label>
-          <label className="flex flex-col gap-1.5 text-sm font-medium text-ui-text">
-            <span>{translate(locale, "activities.field.summary")}</span>
-            <textarea
-              name="summary"
-              rows={4}
-              className="rounded-md border border-ui-border bg-ui-surface px-3 py-1.5 text-sm text-ui-text outline-none focus:border-ui-focus focus:ring-1 focus:ring-ui-focus"
-            />
-          </label>
+          <details className="ui-next-panel-options">
+            <summary>{translate(locale, "panel.optional")}</summary>
+            <div className="ui-next-panel-fields">
+              <label className="flex flex-col gap-1.5 text-sm font-medium text-ui-text">
+                <span>{translate(locale, "activities.field.type")}</span>
+                <input
+                  name="type"
+                  maxLength={80}
+                  className="min-h-[2.5rem] rounded-md border border-ui-border bg-ui-surface px-3 py-1.5 text-sm text-ui-text outline-none focus:border-ui-focus focus:ring-1 focus:ring-ui-focus"
+                />
+              </label>
+              <label className="flex flex-col gap-1.5 text-sm font-medium text-ui-text">
+                <span>{translate(locale, "activities.field.summary")}</span>
+                <textarea
+                  name="summary"
+                  rows={4}
+                  className="rounded-md border border-ui-border bg-ui-surface px-3 py-1.5 text-sm text-ui-text outline-none focus:border-ui-focus focus:ring-1 focus:ring-ui-focus"
+                />
+              </label>
+            </div>
+          </details>
           {error ? (
             <p
               role="alert"

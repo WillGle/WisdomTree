@@ -14,7 +14,6 @@
 .ui-next-work-list__link,
 .ui-next-work-list__meta,
 .ui-next-task-list__row,
-.ui-next-task-list__row > span,
 .ui-next-work-form__actions,
 .ui-next-activity-context li {
   display: flex;
@@ -566,15 +565,6 @@
   }
 }
 
-.ui-next-work-list__link,
-.ui-next-task-list__row {
-  border-radius: 0;
-  border-width: 0 0 1px;
-}
-.ui-next-work-list,
-.ui-next-task-list {
-  gap: 0;
-}
 .ui-next-task-summary__meta {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));

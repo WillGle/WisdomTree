@@ -8,6 +8,7 @@ import type { UiLocale } from "@/modules/auth/profile";
 import {
   Button,
   Dialog,
+  PageHeader,
   Select,
   TextField,
   UnifiedTaskDialog,
@@ -261,7 +262,12 @@ export function CalendarWorkspace({
   const todayHref = `/app/calendar?${base}`;
 
   return (
-    <section className="ui-next-calendar" aria-labelledby="calendar-title">
+    <section className="ui-next-calendar" aria-labelledby="calendar-page-title">
+      <PageHeader
+        titleId="calendar-page-title"
+        title={translate(locale, "calendar.title")}
+        description={translate(locale, "calendar.description")}
+      />
       {failedTask ? (
         <div role="alert" className="ui-next-work-form__error">
           <p>{translate(locale, "tasks.loadFailed")}</p>
@@ -306,6 +312,7 @@ export function CalendarWorkspace({
               />
               <select
                 className="ui-next-cal-toolbar__select"
+                aria-label={translate(locale, "calendar.filterProject")}
                 name="projectId"
                 defaultValue={selectedProjectId ?? ""}
                 onChange={(e) => (e.currentTarget.form as HTMLFormElement).requestSubmit()}
@@ -469,15 +476,40 @@ export function CalendarWorkspace({
 
       {/* ── Deadline dialog ─────────────────────────────────────── */}
       <Dialog
+        footer={
+          <div className="ui-next-work-form__actions">
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={() => {
+                setOpen(false);
+                setEditing(null);
+              }}
+            >
+              {translate(locale, "common.cancel")}
+            </Button>
+            <Button
+              type="submit"
+              form="calendar-deadline-form"
+              variant="primary"
+              loading={saving}
+              loadingLabel={translate(locale, "common.loading")}
+            >
+              {translate(locale, "common.save")}
+            </Button>
+          </div>
+        }
+
         open={open}
         onClose={() => {
           setOpen(false);
           setEditing(null);
         }}
         title={translate(locale, editing ? "calendar.editDeadline" : "calendar.createDeadline")}
+        description={translate(locale, "panel.deadlineHelp")}
         closeLabel={translate(locale, "common.close")}
       >
-        <form className="ui-next-work-form" onSubmit={saveDeadline}>
+        <form id="calendar-deadline-form" className="ui-next-work-form" onSubmit={saveDeadline}>
           {!editing ? (
             <Select
               id="calendar-deadline-project"
@@ -533,26 +565,6 @@ export function CalendarWorkspace({
               {error}
             </p>
           ) : null}
-          <div className="ui-next-work-form__actions">
-            <Button
-              type="button"
-              variant="secondary"
-              onClick={() => {
-                setOpen(false);
-                setEditing(null);
-              }}
-            >
-              {translate(locale, "common.cancel")}
-            </Button>
-            <Button
-              type="submit"
-              variant="primary"
-              loading={saving}
-              loadingLabel={translate(locale, "common.loading")}
-            >
-              {translate(locale, "common.save")}
-            </Button>
-          </div>
         </form>
       </Dialog>
 

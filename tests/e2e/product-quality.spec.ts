@@ -418,12 +418,15 @@ test("research creation connects a dated Activity Task to My Work, Calendar, and
   await expect(page.getByRole("button").filter({ hasText: taskTitle })).toBeVisible();
 
   await renderedPage(page, "/app/my-work");
-  const work = page.locator("main a").filter({ hasText: taskTitle });
+  const work = page.locator(".ui-next-my-work-card").filter({ hasText: taskTitle });
   await expect(work).toBeVisible();
-  await work.click();
-  await expect(page.getByRole("heading", { name: taskTitle, exact: true })).toBeVisible();
+  await work.getByRole("heading", { name: taskTitle, exact: true }).click();
+  await expect(
+    page.getByRole("dialog").getByRole("textbox", { name: "Tiêu đề", exact: true }),
+  ).toHaveValue(taskTitle);
+  await page.keyboard.press("Escape");
   await renderedPage(page, `/app/calendar?m=${dueAt.slice(0, 7)}`);
-  const calendarTask = page.locator("main a").filter({ hasText: taskTitle });
+  const calendarTask = page.locator("main button").filter({ hasText: taskTitle });
   if (!(await calendarTask.isVisible())) {
     await calendarTask.locator("xpath=ancestor::details").locator("summary").click();
   }

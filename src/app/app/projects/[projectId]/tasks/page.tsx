@@ -26,6 +26,8 @@ export default async function ProjectTasksPage({
   return (
     <TasksView
       projectId={projectId}
+      projectName={workspace.project.name}
+      isPersonal={workspace.project.isPersonal}
       locale={application.locale}
       tasks={tasks}
       activities={activities}

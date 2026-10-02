@@ -231,6 +231,7 @@ export function QuickSearch({ locale }: { locale: UiLocale }) {
         open={open}
         onClose={close}
         title={translate(locale, "shell.quickSearch")}
+        description={translate(locale, "panel.searchHelp")}
         closeLabel={translate(locale, "common.close")}
       >
         <div className="ui-next-quick-search grid gap-4">

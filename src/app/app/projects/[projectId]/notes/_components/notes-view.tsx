@@ -111,6 +111,7 @@ export function NotesView({
         open={createOpen}
         onClose={() => setCreateOpen(false)}
         title={translate(locale, "notes.create.title")}
+        description={translate(locale, "panel.noteHelp")}
         closeLabel={translate(locale, "common.close")}
       >
         <Stack as="form" gap="4" id="create-note" onSubmit={handleCreate}>

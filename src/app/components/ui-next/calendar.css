@@ -4,6 +4,8 @@
 
 .ui-next-calendar {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  min-inline-size: 0;
   gap: var(--ui-space-4);
   max-inline-size: var(--ui-width-wide);
   margin-inline: auto;
@@ -26,6 +28,8 @@
 
 .ui-next-cal-toolbar__end {
   display: flex;
+  min-inline-size: 0;
+  max-inline-size: 100%;
   align-items: center;
   gap: var(--ui-space-3);
   flex-wrap: wrap;
@@ -50,7 +54,9 @@
   text-decoration: none;
   background: transparent;
   border-inline-end: 1px solid var(--ui-color-border);
-  transition: background-color 150ms ease, color 150ms ease;
+  transition:
+    background-color 150ms ease,
+    color 150ms ease;
 }
 
 .ui-next-cal-tab:last-child {
@@ -74,6 +80,8 @@
 }
 
 .ui-next-cal-toolbar__select {
+  inline-size: min(20rem, 100%);
+  min-inline-size: 0;
   min-block-size: 2rem;
   border: 1px solid var(--ui-color-border);
   border-radius: var(--ui-radius-sm);
@@ -106,7 +114,9 @@
   color: var(--ui-color-text);
   text-decoration: none;
   background: var(--ui-color-surface);
-  transition: background-color 150ms ease, border-color 150ms ease;
+  transition:
+    background-color 150ms ease,
+    border-color 150ms ease;
 }
 
 .ui-next-cal-nav__today:hover {
@@ -127,7 +137,10 @@
   color: var(--ui-color-text-secondary);
   text-decoration: none;
   background: var(--ui-color-surface);
-  transition: background-color 150ms ease, color 150ms ease, border-color 150ms ease;
+  transition:
+    background-color 150ms ease,
+    color 150ms ease,
+    border-color 150ms ease;
 }
 
 .ui-next-cal-nav__arrow:hover {
@@ -191,6 +204,7 @@
 }
 
 .ui-next-calendar__day {
+  min-inline-size: 0;
   display: grid;
   align-content: start;
   gap: var(--ui-space-1);
@@ -264,7 +278,10 @@
   padding: 0;
   cursor: pointer;
   opacity: 0;
-  transition: opacity 0.15s ease, background-color 0.15s ease, color 0.15s ease;
+  transition:
+    opacity 0.15s ease,
+    background-color 0.15s ease,
+    color 0.15s ease;
 }
 
 .ui-next-calendar__day:hover .ui-next-calendar__quick-add,
@@ -281,6 +298,7 @@
 /* ── Task chip entries ──────────────────────────────────────── */
 
 .ui-next-cal-entries {
+  min-inline-size: 0;
   display: grid;
   gap: var(--ui-space-1);
   margin: 0;
@@ -288,7 +306,13 @@
   list-style: none;
 }
 
+.ui-next-cal-entries > li,
+.ui-next-calendar__overflow {
+  min-inline-size: 0;
+}
+
 .ui-next-cal-chip {
+  min-inline-size: 0;
   display: flex;
   align-items: center;
   inline-size: 100%;

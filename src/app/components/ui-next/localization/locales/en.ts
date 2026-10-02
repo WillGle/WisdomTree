@@ -1,6 +1,47 @@
 import type { viMessages } from "./vi";
 
 export const enMessages: Record<keyof typeof viMessages, string> = {
+  "panel.graphHelp":
+    "Use filters to focus on a project or topic. Display changes how the map looks; layout tuning is optional.",
+  "panel.projectHelp":
+    "Name the research project and its question. After creating it, add sources, notes, and project members.",
+  "panel.inviteHelp":
+    "Create an account for a collaborator. Research person records and project membership are managed separately.",
+
+  "panel.optional": "Optional details",
+  "panel.taskHelp":
+    "Name the next piece of work, choose who will do it, and set a date if needed. You can add planning details later.",
+  "panel.taskReadOnly":
+    "You can review this task and its discussion. Editing is not available with your current access.",
+  "panel.taskPlanning": "Additional planning options",
+  "panel.taskPlanningHelp":
+    "Use these only if your team tracks work in cycles, types, or effort estimates.",
+  "panel.cycleExample": "For example: October fieldwork",
+  "panel.noteHelp":
+    "Give your idea a title. Next you will write in a private draft and attach supporting sources.",
+  "panel.materialHelp":
+    "Name the source and add its file if you have one. Next you can review its text and start a note.",
+  "panel.activityHelp":
+    "Name an interview, visit, meeting, or other research activity. Next you can connect people, sources, notes, and tasks.",
+  "panel.personHelp":
+    "Create a record for a research participant, author, or other person. This does not create a login or grant project access.",
+  "panel.evidenceFind":
+    "Find a source or shared note, then choose the version you used. Attaching it keeps a traceable reference in this draft.",
+  "panel.evidenceVersion":
+    "Choose the exact version behind your statement. You will return to your draft after attaching it.",
+  "panel.publicHelp":
+    "Public publishing makes a shared note version readable without signing in. Private draft changes are not included.",
+  "panel.deadlineHelp":
+    "Record a project milestone or event date. To assign work to someone, create a task instead.",
+  "panel.searchHelp":
+    "Search across the projects you can read. Open a result to continue in its original project.",
+  "panel.activityLinks":
+    "Connect the context for this activity. Linked people, sources, and notes remain in this project.",
+  "panel.libraryHelp":
+    "Choose an item, request a loan, and follow its status here. Approval and handover happen before a loan begins.",
+  "panel.createHelp":
+    "Choose what you need to do. Your new content will belong to the selected project.",
+
   "nav.research": "Research",
   "nav.organize": "Plan & collaborate",
   "nav.tools": "Tools & account",

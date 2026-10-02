@@ -134,6 +134,8 @@ export function LibraryView({
         </div>
       </header>
 
+      <p className="ui-next-panel-help">{translate(locale, "panel.libraryHelp")}</p>
+
       {message ? (
         <p
           className="ui-next-library__message p-3 rounded bg-ui-information-bg text-ui-information"

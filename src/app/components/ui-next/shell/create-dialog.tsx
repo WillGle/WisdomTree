@@ -144,7 +144,10 @@ export function CreateDialog({
         open={open}
         onClose={close}
         title={translate(locale, "shell.newTitle")}
-        description={selected ? undefined : translate(locale, "shell.newDescription")}
+        description={translate(
+          locale,
+          creatingNote ? "panel.noteHelp" : selected ? "panel.createHelp" : "shell.newDescription",
+        )}
         closeLabel={translate(locale, "common.close")}
       >
         {!selected ? (

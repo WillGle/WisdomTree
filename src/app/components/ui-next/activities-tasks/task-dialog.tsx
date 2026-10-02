@@ -122,6 +122,7 @@ export function UnifiedTaskDialog({
   const [dueAt, setDueAt] = useState(toLocalDateTime(task?.dueAt || defaultDueAt));
   const [startAt, setStartAt] = useState(toLocalDateTime(task?.startAt));
   const [notes, setNotes] = useState(task?.notes || "");
+  const [planningOpen, setPlanningOpen] = useState(false);
   const [bottomTab, setBottomTab] = useState<"comments" | "history">("comments");
   const [history, setHistory] = useState<TaskStatusHistoryItem[]>([]);
   const [historyLoading, setHistoryLoading] = useState(false);
@@ -147,6 +148,11 @@ export function UnifiedTaskDialog({
       setState(task?.state || "todo");
       setPriority(task?.priority || "medium");
       setKind(task?.kind || "task");
+      setPlanningOpen(
+        Boolean(
+          task?.sprint || task?.estimatePoints != null || (task?.kind && task.kind !== "task"),
+        ),
+      );
       setSprint(task?.sprint || "");
       setEstimatePoints(task?.estimatePoints != null ? String(task.estimatePoints) : "");
       setAssigneeId(task?.assignedTo || "");
@@ -358,6 +364,7 @@ export function UnifiedTaskDialog({
             : translate(locale, "tasks.edit.title")
           : translate(locale, "tasks.create.title")
       }
+      description={translate(locale, readOnly ? "panel.taskReadOnly" : "panel.taskHelp")}
       closeLabel={translate(locale, "common.close")}
       footer={
         <div className="ui-next-notion-task__actions">
@@ -381,6 +388,9 @@ export function UnifiedTaskDialog({
       <form id={formId} className="ui-next-notion-task" onSubmit={handleSubmit}>
         {/* Large Notion-Style Page Title Input */}
         <div className="ui-next-notion-task__title-row">
+          <label className="ui-next-panel-field-label" htmlFor="task-dialog-title">
+            {translate(locale, "tasks.field.title")}
+          </label>
           <input
             id="task-dialog-title"
             name="title"
@@ -507,68 +517,6 @@ export function UnifiedTaskDialog({
             </div>
           </div>
 
-          {/* Sprint / Cycle Property */}
-          <div className="ui-next-notion-property">
-            <span className="ui-next-notion-property__label">
-              <span>{translate(locale, "tasks.field.sprint")}</span>
-            </span>
-            <div className="ui-next-notion-property__value">
-              <input
-                name="sprint"
-                aria-label={translate(locale, "tasks.field.sprint")}
-                disabled={readOnly || saving}
-                type="text"
-                className="ui-next-notion-control"
-                value={sprint}
-                onChange={(e) => setSprint(e.target.value)}
-                placeholder="Sprint 1, Backlog..."
-              />
-            </div>
-          </div>
-
-          {/* Kind / Type Property */}
-          <div className="ui-next-notion-property">
-            <span className="ui-next-notion-property__label">
-              <span>{translate(locale, "tasks.field.kind")}</span>
-            </span>
-            <div className="ui-next-notion-property__value">
-              <select
-                name="kind"
-                aria-label={translate(locale, "tasks.field.kind")}
-                disabled={readOnly || saving}
-                className="ui-next-notion-control"
-                value={kind}
-                onChange={(e) => setKind(e.target.value as NonNullable<TaskItem["kind"]>)}
-              >
-                <option value="task">{translate(locale, "tasks.kind.task")}</option>
-                <option value="feature">{translate(locale, "tasks.kind.feature")}</option>
-                <option value="bug">{translate(locale, "tasks.kind.bug")}</option>
-                <option value="improvement">{translate(locale, "tasks.kind.improvement")}</option>
-              </select>
-            </div>
-          </div>
-
-          {/* Estimate Points Property */}
-          <div className="ui-next-notion-property">
-            <span className="ui-next-notion-property__label">
-              <span>{translate(locale, "tasks.field.estimatePoints")}</span>
-            </span>
-            <div className="ui-next-notion-property__value">
-              <input
-                name="estimatePoints"
-                aria-label={translate(locale, "tasks.field.estimatePoints")}
-                disabled={readOnly || saving}
-                type="number"
-                min={0}
-                max={100}
-                className="ui-next-notion-control"
-                value={estimatePoints}
-                onChange={(e) => setEstimatePoints(e.target.value)}
-                placeholder="1, 2, 3, 5, 8..."
-              />
-            </div>
-          </div>
-
           {/* Activity Property */}
           {canManageActivity ? (
             <div className="ui-next-notion-property">
@@ -689,6 +637,79 @@ export function UnifiedTaskDialog({
             placeholder={translate(locale, "tasks.field.notesPlaceholder")}
           />
         </div>
+
+        <details
+          className="ui-next-panel-options"
+          key={task?.id ?? "new"}
+          open={planningOpen}
+          onToggle={(event) => setPlanningOpen(event.currentTarget.open)}
+        >
+          <summary>{translate(locale, "panel.taskPlanning")}</summary>
+          <p>{translate(locale, "panel.taskPlanningHelp")}</p>
+          <div className="ui-next-notion-task__properties">
+            {/* Sprint / Cycle Property */}
+            <div className="ui-next-notion-property">
+              <span className="ui-next-notion-property__label">
+                <span>{translate(locale, "tasks.field.sprint")}</span>
+              </span>
+              <div className="ui-next-notion-property__value">
+                <input
+                  name="sprint"
+                  aria-label={translate(locale, "tasks.field.sprint")}
+                  disabled={readOnly || saving}
+                  type="text"
+                  className="ui-next-notion-control"
+                  value={sprint}
+                  onChange={(e) => setSprint(e.target.value)}
+                  placeholder={translate(locale, "panel.cycleExample")}
+                />
+              </div>
+            </div>
+
+            {/* Kind / Type Property */}
+            <div className="ui-next-notion-property">
+              <span className="ui-next-notion-property__label">
+                <span>{translate(locale, "tasks.field.kind")}</span>
+              </span>
+              <div className="ui-next-notion-property__value">
+                <select
+                  name="kind"
+                  aria-label={translate(locale, "tasks.field.kind")}
+                  disabled={readOnly || saving}
+                  className="ui-next-notion-control"
+                  value={kind}
+                  onChange={(e) => setKind(e.target.value as NonNullable<TaskItem["kind"]>)}
+                >
+                  <option value="task">{translate(locale, "tasks.kind.task")}</option>
+                  <option value="feature">{translate(locale, "tasks.kind.feature")}</option>
+                  <option value="bug">{translate(locale, "tasks.kind.bug")}</option>
+                  <option value="improvement">{translate(locale, "tasks.kind.improvement")}</option>
+                </select>
+              </div>
+            </div>
+
+            {/* Estimate Points Property */}
+            <div className="ui-next-notion-property">
+              <span className="ui-next-notion-property__label">
+                <span>{translate(locale, "tasks.field.estimatePoints")}</span>
+              </span>
+              <div className="ui-next-notion-property__value">
+                <input
+                  name="estimatePoints"
+                  aria-label={translate(locale, "tasks.field.estimatePoints")}
+                  disabled={readOnly || saving}
+                  type="number"
+                  min={0}
+                  max={100}
+                  className="ui-next-notion-control"
+                  value={estimatePoints}
+                  onChange={(e) => setEstimatePoints(e.target.value)}
+                  placeholder="1, 2, 3, 5, 8..."
+                />
+              </div>
+            </div>
+          </div>
+        </details>
 
         {/* Error Banner */}
         {error ? (

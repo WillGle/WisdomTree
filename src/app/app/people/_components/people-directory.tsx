@@ -194,31 +194,19 @@ export function PeopleDirectory({
       )}
       {canCreate && projectId ? (
         <Dialog
-          open={createOpen}
-          onClose={() => setCreateOpen(false)}
-          title={translate(locale, "people.new")}
-          description={translate(locale, "people.createDescription")}
-          closeLabel={translate(locale, "common.close")}
-        >
-          {createOpen ? (
-            <form
-              className="ui-next-people-form grid gap-4 min-w-0"
-              action={(formData) => void createPerson(formData)}
-            >
-              <label className="grid gap-1.5 min-w-0">
-                <span className="text-sm font-medium text-ui-text-secondary">
-                  {translate(locale, "people.name")}
-                </span>
-                <input className="ui-next-control" name="displayName" required maxLength={200} />
-              </label>
-              <label className="grid gap-1.5 min-w-0">
-                <span className="text-sm font-medium text-ui-text-secondary">
-                  {translate(locale, "people.summary")}
-                </span>
-                <textarea className="ui-next-control" name="summary" maxLength={1000} rows={3} />
-              </label>
+          footer={
+            <div className="ui-next-dialog-actions">
+              <Button
+                type="button"
+                variant="secondary"
+                disabled={creating}
+                onClick={() => setCreateOpen(false)}
+              >
+                {translate(locale, "common.cancel")}
+              </Button>
               <Button
                 type="submit"
+                form="create-person"
                 variant="primary"
                 className="justify-self-end"
                 disabled={creating}
@@ -227,6 +215,39 @@ export function PeopleDirectory({
               >
                 {translate(locale, "people.new")}
               </Button>
+            </div>
+          }
+          open={createOpen}
+          onClose={() => setCreateOpen(false)}
+          title={translate(locale, "people.new")}
+          description={translate(locale, "panel.personHelp")}
+          closeLabel={translate(locale, "common.close")}
+        >
+          {createOpen ? (
+            <form
+              id="create-person"
+              className="ui-next-people-form grid gap-4 min-w-0"
+              action={(formData) => void createPerson(formData)}
+            >
+              <label className="grid gap-1.5 min-w-0">
+                <span className="text-sm font-medium text-ui-text-secondary">
+                  {translate(locale, "people.name")}
+                </span>
+                <input
+                  className="ui-next-control"
+                  name="displayName"
+                  required
+                  autoFocus
+                  maxLength={200}
+                />
+              </label>
+              <label className="grid gap-1.5 min-w-0">
+                <span className="text-sm font-medium text-ui-text-secondary">
+                  {translate(locale, "people.summary")}
+                </span>
+                <textarea className="ui-next-control" name="summary" maxLength={1000} rows={3} />
+              </label>
+
               {error ? (
                 <p role="alert" className="text-sm text-ui-danger">
                   {translate(locale, "people.saveFailed")}
