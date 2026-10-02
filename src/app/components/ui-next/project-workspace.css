@@ -493,3 +493,63 @@
 .ui-next-research-home__columns:has(> section:only-child) {
   grid-template-columns: minmax(0, 1fr);
 }
+
+/* Keep record lists and their headings consistent across Project modules. */
+.ui-next-project-module-frame
+  :is(
+    .ui-next-notes-list,
+    .ui-next-materials-list,
+    .ui-next-people-list,
+    .ui-next-library__holdings,
+    .ui-next-library__loans ul
+  ) {
+  display: grid;
+  gap: var(--ui-space-3);
+}
+
+.ui-next-project-module-frame
+  :is(
+    .ui-next-notes-item,
+    .ui-next-materials-list__item,
+    .ui-next-work-list__link,
+    .ui-next-task-list__row,
+    .ui-next-people-list__row,
+    .ui-next-library__holding,
+    .ui-next-library__loans :where(li)
+  ) {
+  min-inline-size: 0;
+  border: 1px solid var(--ui-color-border);
+  border-radius: var(--ui-radius-md);
+  padding: var(--ui-space-4);
+  background: var(--ui-color-surface);
+}
+
+.ui-next-project-module-frame
+  :is(
+    .ui-next-notes-item__title,
+    .ui-next-materials-list__heading h3,
+    .ui-next-work-list h3,
+    .ui-next-task-summary > strong,
+    .ui-next-people-list__row h3,
+    .ui-next-library__holding strong
+  ) {
+  margin: 0;
+  font-size: var(--ui-font-size-md);
+  font-weight: 650;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+.ui-next-project-module-frame
+  .ui-next-task-summary__meta
+  > :is(.ui-next-priority-pill, .ui-next-points-pill) {
+  justify-self: start;
+}
+
+.ui-next-project-help h3 {
+  font-size: var(--ui-font-size-md);
+}
+
+.ui-next-project-module-frame .ui-next-materials-list__link {
+  padding: 0;
+}

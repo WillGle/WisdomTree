@@ -102,6 +102,8 @@ export function NotesView({
               form="create-note"
               variant="primary"
               disabled={isCreating || !title.trim()}
+              loading={isCreating}
+              loadingLabel={translate(locale, "common.loading")}
             >
               {isCreating
                 ? translate(locale, "notes.create.creating")
