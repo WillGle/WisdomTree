@@ -1,5 +1,7 @@
 # WisdomTree — thiết kế lấy vault làm trung tâm
 
+> Cập nhật yêu cầu 2026-10-02: người dùng bỏ Vault khỏi luồng sản phẩm, dùng Project làm trọng tâm. Thiết kế Vault dưới đây là lịch sử; phase 2 Vault đã dừng, không tiếp tục triển khai theo plan này. Ưu tiên hiện tại: làm gọn Project, thống nhất trang con và hướng dẫn trong popup [?].
+
 Ngày: 2026-10-02. Bản đầu và bản cập nhật bổ sung hồ sơ dự án/hoạt động, ERD đã được người dùng duyệt; được phép lập kế hoạch triển khai.
 
 ## 1. Mục tiêu đã thống nhất

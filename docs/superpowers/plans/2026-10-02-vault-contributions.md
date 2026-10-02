@@ -1,5 +1,7 @@
 # Vault Contributions Implementation Plan
 
+> Cập nhật yêu cầu 2026-10-02: người dùng bỏ Vault khỏi luồng sản phẩm, dùng Project làm trọng tâm. Thiết kế Vault dưới đây là lịch sử; phase 2 Vault đã dừng, không tiếp tục triển khai theo plan này. Ưu tiên hiện tại: làm gọn Project, thống nhất trang con và hướng dẫn trong popup [?].
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:executing-plans, native execution task-by-task. User instructions override defaults: minimal changes, no new tests/assertions, no dependencies, atomic commits. One independent whole-change review at the end.
 
 **Goal:** Cộng tác viên gửi ghi chú hoặc file vào Vault; chủ kho xem nội dung được gửi, trao đổi và duyệt an toàn bằng giao diện dễ hiểu.
