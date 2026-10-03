@@ -14,6 +14,12 @@ speculative system and was retired with it; it remains in git history
 4. [roadmap.md](./roadmap.md) — what is deliberately not built yet (RAG).
 5. [vocabulary-vi.md](./vocabulary-vi.md) — the Vietnamese UI term map.
 
+## Product direction under review
+
+The [2026-10-03 topic workspace brief](./superpowers/specs/2026-10-03-topic-workspace-product-brief.md)
+records the latest personal exploration and collaboration requirements. It is a
+target product brief, not a description of implemented behavior.
+
 ## Archive
 
 Historical refactor, audit, product-completion, and UI design records live in
