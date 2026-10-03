@@ -1,211 +1,84 @@
 # Architecture
 
-One deployable: **Next.js (App Router) + Drizzle ORM + PostgreSQL**, a
-modular monolith. No workers, no queues, no second service.
+Updated: 2026-10-03. This is the current implementation reference for planning.
+[roadmap.md](./roadmap.md) owns product requirements and the six-phase change
+sequence. Source inspection establishes existing mechanisms; it does not prove
+the planned behavior or runtime readiness.
 
-## Layers (enforced, not aspirational)
+## Foundation to retain
 
-| Layer          | Path                                   | May do                              | May not do                                                  |
-| -------------- | -------------------------------------- | ----------------------------------- | ----------------------------------------------------------- |
-| Delivery       | `src/app/**`                           | Render, read params, call a service | Touch the DB — no `@/db`, no `*/schema`, no `drizzle-orm`   |
-| Business logic | `src/modules/<module>/*`               | Authorize, query, transact, audit   | Reach into another module's tables (convention — see below) |
-| Data           | `src/db/**`, `src/modules/*/schema.ts` | Connection, tables, migrations      | Contain business rules                                      |
+WisdomTree is one Next.js App Router application with React, TypeScript, Drizzle,
+PostgreSQL, and file storage. Keep this structure unless an agreed requirement
+exposes a concrete limitation. No framework replacement is planned.
 
-`scripts/boundaries.test.ts` greps the delivery layer for DB imports on
-every `npm test`; it has caught a real cross-space leak. That is the one
-machine-enforced rule; the module-to-module line is convention, reviewed
-by eye — modules call each other's services freely and share transactions
-(notifyEvent, recordAudit run inside the caller's tx).
+| Area | Existing location | Responsibility |
+| --- | --- | --- |
+| Delivery | `src/app/` | Pages and HTTP routes; call services rather than query the database directly. |
+| Application facade | `src/modules/application/` | Project-oriented operations and DTOs for the UI. |
+| Domain services | `src/modules/` | Authorization, reads, mutations, transactions, and audit. |
+| Persistence | `src/db/`, `src/modules/*/schema.ts`, `drizzle/` | Database connection, schema declarations, and tracked migrations. |
+| UI and localization | `src/app/components/ui-next/`, `src/lib/vi/` | Existing components, styles, VI/EN catalogs, and legacy translations. |
 
-## Modules
+`scripts/boundaries.test.ts` checks delivery-layer database imports as part of
+`npm test`. Inspect service dependencies directly; this check does not establish
+that every domain boundary or permission is correct.
 
-### Next.js delivery
+## Product mapping
 
-The delivery layer is implemented as `src/app/**` and handles rendering, reading parameters, and calling services. It does not directly access the database — no `@/db`, no `*/schema`, no `drizzle-orm`.
+The agreed topic workspace reuses the existing Project identity and stable URLs.
+Quick atomic notes and longer writing use one note identity. References across
+topics must not copy content or grant access. These are target contracts; current
+storage associations still need the phase-1 migration inventory.
 
-### Project-centric application facade
+| Existing modules | Reuse or reconciliation needed |
+| --- | --- |
+| `project`, `application` | Workspace identity, current membership/capabilities, and delivery operations. |
+| `knowledge` | Notes, drafts, content versions, links, graph, and existing editing paths. |
+| `storage` | Materials, file versions, folders, storage access, and source extraction. |
+| `auth`, `vault` | Authentication and overlapping access rules to trace before implementing the new ownership model. |
+| `pm`, `activity` | Existing tasks and work context; reconcile with topic-owner and assignee controls. |
+| `person` | Research people independent from authenticated accounts. |
+| `notify`, `audit` | Comments, notifications, and attributed changes. |
+| `publication`, `export` | Existing public revisions and export mechanisms; reconcile public-on-save without discarding history. |
+| `circulation` | Existing physical-library behavior outside this release's new workflow; no automatic removal. |
 
-The application layer provides project-centric APIs and acts as a facade
-over domain modules. It is implemented as `src/modules/application/`.
+## Authorization gap
 
-- **application** — project-centric APIs for notes, materials, activities,
-tasks, people, and tempo (library/circulation).
+Authorization currently spans the legacy role/scope catalog in
+`src/modules/auth/authorize.ts`, Project permissions in `project/service.ts`,
+Core research access in `auth/core.ts`, Vault checks in `vault/access.ts`, and
+knowledge/storage visibility conditions. Core access to shared Projects is not
+blanket access to personal Projects.
 
-### Current product/domain modules
+This is not yet one implementation of the agreed personal-owner/topic-owner
+contract. Phase 1 inventories readers and mutations, then establishes the
+permission matrix and service-level enforcement. UI capabilities must describe
+those same decisions. Topic membership or a cross-topic reference must not be
+assumed to grant access to a linked item.
 
-These services implement the current project-centric vocabulary:
+## Editing, history, and publication gaps
 
-- **project** — project domain including capabilities, permissions, and
-  project context.
-- **person** — canonical person identity independent from authenticated
-  users.
-- **activity** — collaborative work context for projects.
-- **search** — internal research search functionality.
-- **publication** — note publishing system and public versioning.
+Existing private drafts, version checks, comments, presence, and graph views are
+reusable foundations. Presence and immediate saves do not establish synchronized
+concurrent editing; the graph does not establish a shared whiteboard arrangement.
 
-These modules are conceptually distinct from the implementation infrastructure below —
-they expose project-centric operations for Notes, Materials, Activities, Tasks,
-People, Search, Publication, Tempo, etc.
+The roadmap requires private capture, explicit contribution, recoverable changes,
+live text and board updates, and owner-enabled publication that updates after a
+successful save. Existing wiki review and public-revision paths must be traced
+before replacement. Decisions D1–D8 remain in the roadmap; no implementation
+choice here settles them.
 
-### Reused foundational implementation modules
+Services use `ApiError`; application consumers also use the mapped DTO contract
+in `src/modules/application/errors.ts`. Preserve intentional denied/missing
+responses and version conflicts. Unexpected failures must remain errors rather
+than masquerading as missing notes.
 
-These modules provide the existing implementation infrastructure and legacy persistence vocabulary:
+## Validation and older mechanisms
 
-- **auth** — users, sessions, the `authorize()` catalog, admin user
-  management, OIDC, the dev-only demo login.
-- **storage** — spaces & membership, folders, sources (files) with
-  versioning, OCR/pandoc extraction (`extraction.ts`, in-process),
-  extraction candidates ("my OCR imports"), categories, and
-  `physical.ts`: books as Library items (`source_physical`, 1:1 with
-  `sources`).
-- **circulation** — the loan state machine
-  (`requested → approved → borrowed → returned`, + declined/overdue) over
-  physical items; one active loan per item enforced by a partial unique
-  index.
-- **knowledge** — space-scoped hierarchical branches, ordered tree nodes with
-  safe Markdown content and optional English translations,
-  append-only `tree_node_versions`, wiki/typed links, tags, the one
-  proposal table (`node_proposals`, kind = change | publication),
-  per-user `node_drafts`, promotions (provenance), presence, and the graph read-side
-  (`graph-provider.ts`) feeding the graph view.
-- **pm** — tasks (board), deadlines (+reminders, checklists, links),
-  calendar tokens/ICS.
-- **notify** — comments with inline `@mentions`, the in-app notification
-  center, per-event opt-out, and the fan-out (`fanout.ts`).
-- **export** — the legacy full-tree Admin/Op export plus official per-space
-  wiki releases. A release selects only non-archived team content marked
-  `verified + publish`, validates links and Markdown, writes deterministic
-  `topics/<node-id>/<locale>.md`, `vault.xml`, and `links.xml`, then verifies
-  the exact Git tree. PostgreSQL remains authoritative; released snapshots
-  are immutable and can rebuild `data/vault-repos/<space-id>.git`.
-- **audit** — the `recordAudit` helper; `audit_events` is
-  append-only (DB trigger) and read back on `/admin`.
+Follow the roadmap's phase gates and [operations.md](./operations.md) for isolated
+validation. A documentation update is not a completed implementation phase.
 
-Note that the application facade exposes project-centric operations for Notes,
-Materials, Activities, Tasks, People, Search, Publication, Tempo, etc.
-
-The implementation vocabulary may adapt/reuse concepts from the legacy vocabulary:
-
-- Space / Branch / TreeNode / Source / Deadline / WikiRelease
-
-Different names across these layers are intentional and do not imply
-a schema migration is required.
-
-## Authorization
-
-`authorize(actor, permission, resource)` is the single gate
-(`src/modules/auth/authorize.ts`). Roles carry the vertical axis
-(user/editor/admin_op — no capability table, no vault grants); the
-**scope** qualifier does the per-record work: `global`, `space` (with a
-viewer<contributor<manager ladder over `space_members`), `self`, and
-`owned-or-assigned`. Denied reads throw 404 (no existence leak); denied
-writes throw 403.
-
-Branch visibility derives from the branch row itself: a `team` branch
-is visible only to members of its `space_id`, while a `personal` branch is
-visible only to its owner (`branchVisibilityCondition`). Team edits and
-reviews require both the appropriate global role and space membership;
-cross-space node links are refused.
-
-## Wiki projection and recovery
-
-PostgreSQL owns editable content and authorization. A release stores its exact
-file snapshot and SHA-256 manifest in `wiki_releases`; a database trigger
-rejects updates or deletion after status becomes `released`. The Git mirror is
-a recoverable projection, not an input. Verify compares every path and byte
-against the stored snapshot; rebuild rewrites the mirror from that snapshot
-without changing the release row.
-
-## Sessions, timeout, traffic cap
-
-- Sessions are server-side rows (`sessions`), the cookie holds a random
-  token and the DB only its SHA-256. Revocable per user (and revoked on
-  disable); rows expired 30+ days are purged by the cron tick.
-- **Inactivity timeout**: `last_seen_at` is written on every request and
-  read on resolve — idle past `SESSION_IDLE_MS` (default 30 min) reads
-  as signed out; `SESSION_TTL_MS` (7 days) is the absolute cap.
-- **Traffic cap**: every resolved principal passes
-  `enforceUserRateLimit` (default 240 req/min per account, in-process —
-  fine for the single-instance deployment).
-- **Demo login** (`auth/dev-login.ts`): a seeded-member picker that
-  exists only when `NODE_ENV !== "production"`; no env override.
-  Automated tests do not use it — they insert a session row directly
-  (`tests/setup.ts`, `tests/e2e/global-setup.ts`).
-
-## Wiki editing lifecycle
-
-- **Personal branches: live edit.** `updateNode` saves immediately under
-  an optimistic version check; every save appends a complete
-  `tree_node_versions` row. `/tree/node/:id/history` shows the chain,
-  diffs any two versions (`src/lib/diff.ts`, line LCS) and restores by
-  appending — history is never rewritten (append-only trigger).
-- **Team pages: private draft over official content.** Each contributor edits
-  their own `node_drafts` row. Autosave uses a draft version, publishing uses
-  the official base version, and a conflict must be merged before retrying.
-  Readers, search, graph, and releases continue to use only the official
-  `tree_nodes` / `node_translations` rows.
-- **Protected pages use review.** A manager can set `review_required`; those
-  drafts become an inline proposal and need an independent reviewer. Normal
-  pages are self-published by contributors. Existing verified/published pages
-  are protected by migration.
-- **Promotion remains a review boundary.** A personal node is
-  proposed onto a team branch (`node_proposals`, kind=publication); an
-  independent reviewer (editor/admin, never the submitter —
-  `assertIndependentReviewer`) decides; approval creates the promoted
-  node and a `promotions` provenance row.
-- **Presence is advisory, not a lock.** The editor shows who else is on the
-  page. Concurrent saves are protected by optimistic checks; no user owns a
-  hard file lock.
-- **Restore cannot bypass protection.** Restoring a shared revision creates a
-  personal draft based on the current official version. It then follows the
-  same self-publish or protected-review path.
-
-## Library, books, loans
-
-Books are Library items: the `sources` row carries title/space/category
-("Sách" is seeded; more categories are an INSERT), `source_physical`
-carries the shelf facts (LIB-code, author, location, copies, status).
-Loans hang off the physical row; state transitions, the copies-vs-loans
-guards, and the per-item loan register live in `circulation/service.ts`.
-
-The loan desk is `/library/loans`; the item page hosts request/approve/
-hand-over/return.
-
-## Notifications
-
-Mutations call `notifyEvent` inside their own transaction
-(`notify/fanout.ts`): recipients come from the event matrix, per-event
-opt-out from `notification_preferences`, and the in-app center is the
-only channel — the notifications row is delivery itself; a second real
-channel brings its own bookkeeping. Deadline reminders are
-the one time-driven producer: the `POST /api/cron/dispatch` cron fires
-them exactly-once via the `(deadline_id, offset)` PK.
-
-## Graph view
-
-Server: `modules/knowledge/graph-provider.ts` loads visible nodes/edges/tags.
-Client: `src/app/components/knowledge-map/` renders them with the
-open-source **force-graph** engine (canvas 2D, d3-force). The component
-owns product behavior — verification shapes (circle/diamond/square),
-label LOD, per-link-type colors/arrows, hover preview cards, context
-menu, keyboard navigation with aria-live, the filter pipeline, ego mode
-(`?node=&depth=`), and the settings panel whose seven sliders map to
-d3 forces with the invariant _slider midpoint = shipped default_
-(unit-tested). Client-only: no SSR graph markup.
-
-## Extraction (OCR)
-
-`storage/extraction.ts` routes by MIME: images/PDF → tesseract (with
-Vietnamese language data), docx/odt/html → pandoc, text → direct. The
-assembled markdown lands in `extraction_candidates`; the uploader
-evolves it into a node in their personal branch, and review happens only
-at promotion. Failure never blocks storage — the original file is
-always kept and downloadable.
-
-## Error contract
-
-`ApiError { status, code, message(EN), details? }`. Codes are stable;
-the FE translates by code (`src/lib/vi/errors.ts`), interpolating from
-`details` (e.g. `holderName`, `onLoan`, `retryAfterSeconds`), and falls
-back to the English message for unknown codes. `change_summary` values
-in `tree_node_versions` are stable English codes translated at render.
+Earlier wiki lifecycle, release, library, and graph descriptions are retained in
+[the archived architecture reference](./archive/previous-reference/architecture.md).
+Use them only to investigate a specific existing caller, then verify current code.
+They do not prescribe the new workflow.

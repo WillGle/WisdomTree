@@ -1,13 +1,15 @@
 # Operations
 
+Runtime reference for the existing application. Product scope and progress live
+in [roadmap.md](./roadmap.md). These procedures are not instructions to deploy,
+seed, or resume implementation during a documentation-only session.
+
 ## Local development
 
 ```sh
-npm install
+npm ci
 npm run setup:system     # once per machine: pandoc + poppler + tesseract(-vie)
-npm run demo:dev         # db up → migrate → destructive seed → next dev
-# or, non-destructively:
-npm run runtime:up && npm run db:migrate && npm run dev
+npm run dev             # db up → migrate → next dev; no seed
 ```
 
 Sign-in on a dev machine: the demo picker on `/login` (exists only when
@@ -16,15 +18,17 @@ Sign-in on a dev machine: the demo picker on `/login` (exists only when
 invite-only. For a seeded demo you can reach with your own Gmail, set
 `SEED_ADMIN_EMAIL` before `db:seed`.
 
-**`db:seed` TRUNCATEs every table** and refuses to run without
+For a disposable demo only, `npm run demo:dev` migrates and destructively seeds
+before starting development. **`db:seed` TRUNCATEs every table** and refuses to run without
 `ALLOW_DESTRUCTIVE_SEED=1`. To restart without touching data:
 `npm run start:prod`. First install on a real empty DB:
 `npm run db:bootstrap -- --admin-email … --admin-name …` (non-destructive).
 
-Do not run `npm run build` while a dev server is using the same `.next`
-(turbopack and webpack artifacts corrupt each other; symptom:
-`Cannot find module '[turbopack]_runtime.js'` — fix: stop the server,
-`rm -rf .next`).
+Development uses `.next-dev`; production builds use `.next` (see
+`next.config.ts`). Do not rebuild over a running server that uses the same build
+directory. For stale development chunks, stop the parent dev process, confirm
+which output directory is stale, move aside only that generated directory, and
+restart one server. Do not delete application data to repair a build cache.
 
 ## Environment
 
@@ -32,8 +36,7 @@ See [.env.example](../.env.example) for the full list. The ones that
 matter in production: `DATABASE_URL` and `SESSION_SECRET` (both refused
 missing), `CRON_SECRET` (deadline-reminder cron), `TRUST_PROXY=1` only
 behind a proxy that rewrites forwarding headers, the Google OIDC
-triple, and the tunables `SESSION_IDLE_MS`, `USER_RATE_LIMIT`,
-`EDIT_LOCK_TTL_MS`.
+triple, and the tunables `SESSION_IDLE_MS` and `USER_RATE_LIMIT`.
 
 `VAULT_GIT_DIR` optionally changes the directory containing per-space bare Git
 mirrors (default `./data/vault-repos`).
@@ -64,29 +67,19 @@ Cron, on the host:
   tarballs of the object store and `VAULT_GIT_DIR` (suggested crontab inside
   the script). Keep all artifacts from the same run together.
 
-## Wiki releases
-
-Migration `0036_wiki_title_preflight.sql` stops if two active pages in one
-space share a normalized Vietnamese or English title. Resolve the reported
-titles before retrying; the migration does not rename content automatically.
-
-Managers use `/wiki/releases` to create, verify, or rebuild a space release;
-Admin/Op has cross-space knowledge access. The equivalent endpoints are:
-
-- `GET|POST /api/spaces/{spaceId}/wiki/releases`
-- `POST /api/wiki/releases/{releaseId}/verify`
-- `POST /api/wiki/releases/{releaseId}/rebuild`
-
-Creation fails rather than publishing when a wiki link is unresolved or the
-safe-Markdown validator reports an error. Verify checks the current Git tree
-against both the immutable database snapshot and its manifest hash. Rebuild
-restores that exact snapshot; it never regenerates from today's editable wiki.
-
 ## Tests
 
 `npm test` = lint + typecheck + unit + boundaries + sign/time contracts and
-contrast audit. `npm run test:integration` needs the seeded local DB.
+contrast/style checks. Stateful suites require a separately created, migrated,
+and seeded disposable database selected by `TEST_DATABASE_URL`, with a distinct
+`test` segment in its name. Never use the normal application database. Match the
+test/runtime database URLs and isolate object storage for browser tests. See
+[tests/README.md](../tests/README.md) for the runner and fixture procedures.
 `npm run test:e2e` builds on a standalone build; its global-setup signs in by
 inserting a session row (no in-app backdoor). On NixOS the bundled Playwright
 chromium lacks system libs — point `PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH` at a
 system chromium.
+
+Retired wiki-release procedures are in the
+[archived operations reference](./archive/previous-reference/operations.md).
+Verify the current route and service before using an old procedure.

@@ -1,42 +1,51 @@
-# WisdomTree Documentation
+# WisdomTree documentation
 
-Documentation for the system **as built** (post the 2026-08-22/23 refactor).
-The planning-era document tree that used to live here described a much larger
-speculative system and was retired with it; it remains in git history
-(`docs/` before commit `6c72880`).
+Updated: 2026-10-03. This directory separates agreed product intent, existing
+implementation references, and historical evidence.
 
-## Reading order
+## Start here
 
-1. [product.md](./product.md) — what the product is, for whom, and its scope.
-2. [architecture.md](./architecture.md) — modules, data model, auth,
-   the wiki draft lifecycle, and the conventions the code enforces.
-3. [operations.md](./operations.md) — running, deploying, backing up.
-4. [roadmap.md](./roadmap.md) — what is deliberately not built yet (RAG).
-5. [vocabulary-vi.md](./vocabulary-vi.md) — the Vietnamese UI term map.
+Read [roadmap.md](./roadmap.md) first. It owns current product contracts, open
+decisions, implementation order, acceptance criteria, and progress. It is the
+agent entry point, not a replacement for applicable working instructions or
+inspection of the code being changed.
 
-## Product direction under review
+Implementation resumed on 2026-10-03 at the user’s request. The roadmap records
+the current phase-1 work and the separately paused panel prototype. Old plans
+do not override the current implementation sequence.
 
-The [2026-10-03 topic workspace brief](./superpowers/specs/2026-10-03-topic-workspace-product-brief.md)
-records the latest personal exploration and collaboration requirements. It is a
-target product brief, not a description of implemented behavior.
+| Document | Purpose and authority |
+| --- | --- |
+| [Roadmap](./roadmap.md) | Canonical requirements, decisions D1–D8, six phases, and completion evidence. |
+| [Product](./product.md) | Short audience and workflow summary; details defer to the roadmap. |
+| [Architecture](./architecture.md) | Existing implementation and legacy mechanisms; verify relevant source before changing them. Not a competing target specification. |
+| [Operations](./operations.md) | Development, deployment, recovery, and isolated validation procedures; read when needed. |
+| [Vietnamese vocabulary](./vocabulary-vi.md) | Current translation sources and wording review rules. |
+| [Archive](./archive/README.md) | Complete index of previous designs, audits, implementation results, and artifacts. |
 
-## Archive
+## Keeping information consistent
 
-Historical refactor, audit, product-completion, and UI design records live in
-[archive/](./archive/).
+- Simplicity leads: preserve working foundations; add only what the agreed need requires.
+- Record a product decision in the roadmap first, then align the short summary or
+  affected reference. Do not create a second authoritative requirements list.
+- Keep unresolved decisions explicit. Proposed behavior is not implemented behavior.
+- For implementation, read the relevant source, existing checks, and the accepted
+  phase plan, if one exists. Old plans do not authorize work or override the roadmap.
+- Preserve historical results, commit references, and failures. Their pass/fail
+  claims apply to the recorded revision and environment, not today's application.
+- Code and migrations establish current schema/API behavior; the roadmap states
+  what must change. A mismatch is a gap to investigate, not permission to silently
+  change either the requirement or the data.
+- Keep internals and technical documentation in English. Use existing localization
+  catalogs for UI copy; see the vocabulary reference for both active catalog locations.
 
-## Conventions (standing owner decisions)
+The dated Vault plans and initial panel-first roadmap under `archive/superpowers/` are
+superseded. The personal reference-panel plan is a paused phase-3 candidate;
+its unfinished prototype is not a completed roadmap phase. Result documents
+remain historical evidence. Future phase results must link back to this roadmap.
 
-- **Simple-first**: the minimal design that meets the stated need, kept
-  upgradeable; no tables, workers, abstractions, or admin UI for needs that
-  do not exist yet. When two designs are equivalent, the one with fewer
-  concepts wins.
-- **English internals**: BE processing, APIs, error messages, logs, comments,
-  DB-persisted generated strings, and these documents are English. Vietnamese
-  exists only in the FE, always through the translator layer (`src/lib/vi`) —
-  never hardcoded in a component. `ApiError.code` values are a stable
-  contract; the FE translates by code (`translateApiError`).
-- **Code is the source of truth** for schema and API shape: `drizzle/*.sql`
-  (forward-only, tracked in `schema_migrations`) and `src/modules/*/schema.ts`
-  for tables; the route files under `src/app/api/` for endpoints. These
-  documents explain intent and invariants, not column-by-column detail.
+Only the six top-level documents are maintained as active references. The old
+`target-architecture.md` and `superpowers/` structure now live entirely in
+`archive/`. Add a focused phase plan under `docs/plans/` and a result under
+`docs/results/` only when that work is needed; neither directory is an additional
+requirements authority. Do not add new work to the archived plan structure.
