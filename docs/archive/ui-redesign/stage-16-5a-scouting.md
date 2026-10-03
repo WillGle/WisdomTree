@@ -1,5 +1,10 @@
 # Stage 16.5A — UX/UI scouting
 
+> **Historical record — status clarified 2026-10-03.** Requirements and results below
+> apply to their original scope and revision. They do not define current product
+> requirements, authorize implementation, or establish current release readiness.
+> Use the [canonical roadmap](../../roadmap.md) for current decisions and progress.
+
 ## Scope and evidence status
 
 This artifact is a design study, not an implementation specification. It uses the accepted Stage 1–16 contracts, the current UX audit, selected current interaction code, and public product documentation. The old WisdomTree UI is evidence for behavior and pain points only.

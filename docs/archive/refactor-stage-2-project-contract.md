@@ -1,5 +1,10 @@
 # Stage 2 — Project Foundation & Migration Contract
 
+> **Historical record — status clarified 2026-10-03.** Requirements and results below
+> apply to their original scope and revision. They do not define current product
+> requirements, authorize implementation, or establish current release readiness.
+> Use the [canonical roadmap](../roadmap.md) for current decisions and progress.
+
 Baseline: accepted Stage 1 report at repository HEAD `c60620f`, inspected 2026-09-01. This document defines a target domain/application contract and migration boundaries. It does not prescribe routes or UI and does not change runtime behavior.
 
 Evidence labels:

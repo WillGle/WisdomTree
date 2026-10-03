@@ -1,5 +1,10 @@
 # PC0 migration findings
 
+> **Historical record — status clarified 2026-10-03.** Requirements and results below
+> apply to their original scope and revision. They do not define current product
+> requirements, authorize implementation, or establish current release readiness.
+> Use the [canonical roadmap](../../roadmap.md) for current decisions and progress.
+
 The fresh disposable database applied 0000 through 0053 in order and seeded successfully. schema_migrations recorded 54 entries, with 0053_activity_task_comment_anchors.sql as the current head. The requested 0048–0052 audit is below; 0053 is recorded because it is already part of the current checkout and changes PR3 truth.
 
 | Migration | Finding | Status |

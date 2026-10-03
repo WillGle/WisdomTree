@@ -1,5 +1,10 @@
 # PC1 independent validation result
 
+> **Historical record — status clarified 2026-10-03.** Requirements and results below
+> apply to their original scope and revision. They do not define current product
+> requirements, authorize implementation, or establish current release readiness.
+> Use the [canonical roadmap](../../roadmap.md) for current decisions and progress.
+
 This result is separate from the implementation conclusion. It used a new disposable database named wisdomtree_test_pc1_collaboration_20260913 and current source/tests.
 
 | Check | Result |

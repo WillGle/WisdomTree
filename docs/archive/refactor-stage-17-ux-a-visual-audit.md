@@ -1,5 +1,10 @@
 # Stage 17.UX-A — Production UI Visual & Layout Audit
 
+> **Historical record — status clarified 2026-10-03.** Requirements and results below
+> apply to their original scope and revision. They do not define current product
+> requirements, authorize implementation, or establish current release readiness.
+> Use the [canonical roadmap](../roadmap.md) for current decisions and progress.
+
 ## 1. Audit verdict
 
 **BROWSER VISUAL AUDIT BLOCKED.** No finding in this report is claimed as observed in a browser. The documented local production-test endpoint was not listening during this audit, and a direct Playwright Chromium launch failed because `libglib-2.0.so.0` is unavailable. This matches the Stage 17.V browser-runtime limitation.

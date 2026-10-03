@@ -1,5 +1,10 @@
 # People specification
 
+> **Historical record — status clarified 2026-10-03.** Requirements and results below
+> apply to their original scope and revision. They do not define current product
+> requirements, authorize implementation, or establish current release readiness.
+> Use the [canonical roadmap](../../../roadmap.md) for current decisions and progress.
+
 ## Product meaning
 
 A Person is a canonical research identity. A Person may be a research subject, historical figure, collaborator, or community member and may have no application account.

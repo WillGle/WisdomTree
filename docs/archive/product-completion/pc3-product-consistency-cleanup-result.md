@@ -1,5 +1,10 @@
 # PC3 — Product Consistency & Legacy Cleanup Result
 
+> **Historical record — status clarified 2026-10-03.** Requirements and results below
+> apply to their original scope and revision. They do not define current product
+> requirements, authorize implementation, or establish current release readiness.
+> Use the [canonical roadmap](../../roadmap.md) for current decisions and progress.
+
 ## Result
 
 **PC3 COMPLETE.** Every legacy component inspected has an explicit retention reason or compatibility classification. No data-bearing or externally reachable compatibility code was falsely treated as dead.

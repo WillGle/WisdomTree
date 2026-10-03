@@ -1,5 +1,10 @@
 # Stage 17.R — Consolidated Codex Re-Audit & Repair
 
+> **Historical record — status clarified 2026-10-03.** Requirements and results below
+> apply to their original scope and revision. They do not define current product
+> requirements, authorize implementation, or establish current release readiness.
+> Use the [canonical roadmap](../roadmap.md) for current decisions and progress.
+
 ## 1 Verdict
 
 **RATIFIED WITH MINOR REPAIRS.** The Stage 17.6B–17.9 and 17.C foundation is trustworthy enough to continue Stage 17.10 after the normal deployment applies migrations `0050` and `0051`. Stage 17.10 was not started.

@@ -1,5 +1,10 @@
 # PC0 authorization matrix
 
+> **Historical record — status clarified 2026-10-03.** Requirements and results below
+> apply to their original scope and revision. They do not define current product
+> requirements, authorize implementation, or establish current release readiness.
+> Use the [canonical roadmap](../../roadmap.md) for current decisions and progress.
+
 R means Project research-read access. O means operational membership. — means denied or not disclosed. Assignment is additive: neither admin_op, Core, nor library operator automatically grants unrelated Project operational access.
 
 | Actor | Project research | Project settings/roster | Admin/Core | Tempo Library/physical | Tasks/Calendar | Collaboration | Search/Graph | ICS |

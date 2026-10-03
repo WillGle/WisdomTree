@@ -1,5 +1,10 @@
 # Material and extraction workflow specification
 
+> **Historical record — status clarified 2026-10-03.** Requirements and results below
+> apply to their original scope and revision. They do not define current product
+> requirements, authorize implementation, or establish current release readiness.
+> Use the [canonical roadmap](../../../roadmap.md) for current decisions and progress.
+
 ## Product representation
 
 One Material may have metadata, many digital versions, one optional physical representation, extraction state, and research usage. The UI never presents Source, SourceVersion, SourcePhysical, or ExtractionCandidate as separate top-level products.

@@ -1,5 +1,10 @@
 # Concept A — Project Workspace
 
+> **Historical record — status clarified 2026-10-03.** Requirements and results below
+> apply to their original scope and revision. They do not define current product
+> requirements, authorize implementation, or establish current release readiness.
+> Use the [canonical roadmap](../../roadmap.md) for current decisions and progress.
+
 ## Thesis
 
 An approachable Project-first workspace inspired by the interaction strengths of Linear and Dovetail. The global shell is stable, each Project has horizontal local navigation, and detail appears in a collapsible inspector. This is the clearest default for mixed-frequency collaborators.

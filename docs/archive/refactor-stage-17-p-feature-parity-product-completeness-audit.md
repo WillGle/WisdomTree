@@ -1,5 +1,10 @@
 # Stage 17.P — Legacy Feature Parity & Product Completeness Audit
 
+> **Historical record — status clarified 2026-10-03.** Requirements and results below
+> apply to their original scope and revision. They do not define current product
+> requirements, authorize implementation, or establish current release readiness.
+> Use the [canonical roadmap](../roadmap.md) for current decisions and progress.
+
 ## 1. Verdict
 
 **INCOMPLETE — PRODUCT DECISIONS REQUIRED.** The target has a coherent research-workspace core, but it does not yet provide an administration or Project-lifecycle surface. A system administrator can create a Project and manage its members in the backend; a real user cannot do either through the target product. Several former workflows also survive only as legacy services/APIs rather than target application capabilities.

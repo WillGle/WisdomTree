@@ -1,5 +1,10 @@
 # Stage 11 — Project Activity Foundation Result
 
+> **Historical record — status clarified 2026-10-03.** Requirements and results below
+> apply to their original scope and revision. They do not define current product
+> requirements, authorize implementation, or establish current release readiness.
+> Use the [canonical roadmap](../roadmap.md) for current decisions and progress.
+
 ## 1. Result
 
 **PASS.** Activity is now a first-class, confirmed-Project-owned domain object with explicit Person, Task, Material, and internal Note context. No routes, UI, Calendar integration, Hybrid Core behavior, seed rewrite, or inferred data backfill was added.

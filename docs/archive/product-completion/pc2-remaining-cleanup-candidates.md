@@ -1,5 +1,10 @@
 # PC2 remaining cleanup candidates
 
+> **Historical record — status clarified 2026-10-03.** Requirements and results below
+> apply to their original scope and revision. They do not define current product
+> requirements, authorize implementation, or establish current release readiness.
+> Use the [canonical roadmap](../../roadmap.md) for current decisions and progress.
+
 PC3 is locked. Nothing in this list was deleted during PC2.
 
 | Explicitly retired outcome       | Cleanup candidate for future review                        | Retention prerequisite                                                                           |

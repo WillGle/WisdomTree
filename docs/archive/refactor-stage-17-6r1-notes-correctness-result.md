@@ -1,5 +1,10 @@
 # Stage 17.6R1 — Notes Correctness Repair Result
 
+> **Historical record — status clarified 2026-10-03.** Requirements and results below
+> apply to their original scope and revision. They do not define current product
+> requirements, authorize implementation, or establish current release readiness.
+> Use the [canonical roadmap](../roadmap.md) for current decisions and progress.
+
 ## 1. Verdict
 
 **PASS**

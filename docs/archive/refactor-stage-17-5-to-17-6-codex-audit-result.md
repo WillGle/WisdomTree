@@ -1,5 +1,10 @@
 # Codex Cumulative Audit — Stage 17.5 through 17.6
 
+> **Historical record — status clarified 2026-10-03.** Requirements and results below
+> apply to their original scope and revision. They do not define current product
+> requirements, authorize implementation, or establish current release readiness.
+> Use the [canonical roadmap](../roadmap.md) for current decisions and progress.
+
 Audit date: 2026-09-02
 
 ## 1. Verdict

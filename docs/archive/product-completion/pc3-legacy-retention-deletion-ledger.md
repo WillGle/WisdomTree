@@ -1,5 +1,10 @@
 # PC3 legacy retention and deletion ledger
 
+> **Historical record — status clarified 2026-10-03.** Requirements and results below
+> apply to their original scope and revision. They do not define current product
+> requirements, authorize implementation, or establish current release readiness.
+> Use the [canonical roadmap](../../roadmap.md) for current decisions and progress.
+
 Date: 2026-09-13. Classifications are based on current consumer traces, not the absence of legacy UI.
 
 | Cluster                                                        | Current consumers traced                                                                                                                                         | Classification                | PC3 disposition                                                                                                                                                    |

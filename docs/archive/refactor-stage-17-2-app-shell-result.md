@@ -1,5 +1,10 @@
 # Stage 17.2 — New App Shell / Global Navigation result
 
+> **Historical record — status clarified 2026-10-03.** Requirements and results below
+> apply to their original scope and revision. They do not define current product
+> requirements, authorize implementation, or establish current release readiness.
+> Use the [canonical roadmap](../roadmap.md) for current decisions and progress.
+
 ## 1. Result
 
 PASS. A parallel authenticated `/app` shell now provides localized global navigation, responsive behavior, Quick Search, Project-first New, and account utilities. The old UI remains available and unchanged on its existing routes.

@@ -1,5 +1,10 @@
 # Product quality adjustments — 2026-09-14
 
+> **Historical record — status clarified 2026-10-03.** Requirements and results below
+> apply to their original scope and revision. They do not define current product
+> requirements, authorize implementation, or establish current release readiness.
+> Use the [canonical roadmap](../../roadmap.md) for current decisions and progress.
+
 ## Product model
 
 Project-first research workspace with capability-based access. Personal Projects are owner-only; shared Projects separate research access from operational membership. Authenticated Users and canonical research Person records are different objects.

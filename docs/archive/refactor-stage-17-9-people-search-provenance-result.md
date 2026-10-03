@@ -1,5 +1,10 @@
 # Stage 17.9 — People, Research Search & Provenance Discovery
 
+> **Historical record — status clarified 2026-10-03.** Requirements and results below
+> apply to their original scope and revision. They do not define current product
+> requirements, authorize implementation, or establish current release readiness.
+> Use the [canonical roadmap](../roadmap.md) for current decisions and progress.
+
 ## 1. Verdict
 
 **PASS.** Full mandatory validation gate completed 2026-09-03 (Asia/Ho_Chi_Minh, UTC+7). Stage 17.9 adds target application read/delivery contracts only; no schema migration or normal-domain data mutation is required.

@@ -1,5 +1,10 @@
 # Stage 17.3 — TMKT Overview / Projects result
 
+> **Historical record — status clarified 2026-10-03.** Requirements and results below
+> apply to their original scope and revision. They do not define current product
+> requirements, authorize implementation, or establish current release readiness.
+> Use the [canonical roadmap](../roadmap.md) for current decisions and progress.
+
 ## 1. Result
 
 PASS. `/app` and `/app/projects` now render real accepted application data inside the Stage 17.2 shell. No fake analytics, recent-research feed, Project statistics, direct database access, or legacy product vocabulary was introduced.

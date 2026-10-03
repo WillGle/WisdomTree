@@ -1,5 +1,10 @@
 # PC2 final capability ledger
 
+> **Historical record — status clarified 2026-10-03.** Requirements and results below
+> apply to their original scope and revision. They do not define current product
+> requirements, authorize implementation, or establish current release readiness.
+> Use the [canonical roadmap](../../roadmap.md) for current decisions and progress.
+
 Date: 2026-09-13. This is the post-decision ledger for the PC0 capability set. It preserves outcomes that serve traceability, stewardship, and research workflow, and retires only owner-approved legacy structures.
 
 ## Resolution status

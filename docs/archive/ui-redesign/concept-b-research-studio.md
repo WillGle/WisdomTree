@@ -1,5 +1,10 @@
 # Concept B — Research Studio
 
+> **Historical record — status clarified 2026-10-03.** Requirements and results below
+> apply to their original scope and revision. They do not define current product
+> requirements, authorize implementation, or establish current release readiness.
+> Use the [canonical roadmap](../../roadmap.md) for current decisions and progress.
+
 ## Thesis
 
 A research-object studio inspired by Capacities and Zotero. Project remains the ownership boundary, but Notes, Materials, and People are stable objects browsed through a compact object rail, central canvas, and strong contextual inspector. Evidence stays close to writing.

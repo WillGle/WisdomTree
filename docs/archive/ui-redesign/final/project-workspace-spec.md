@@ -1,5 +1,10 @@
 # Project workspace specification
 
+> **Historical record — status clarified 2026-10-03.** Requirements and results below
+> apply to their original scope and revision. They do not define current product
+> requirements, authorize implementation, or establish current release readiness.
+> Use the [canonical roadmap](../../../roadmap.md) for current decisions and progress.
+
 ## Workspace shell
 
 Every Project route receives `getProjectWorkspace(actor, projectId)` before rendering local navigation. The UI consumes its modules and named capabilities; it does not infer access from roles.

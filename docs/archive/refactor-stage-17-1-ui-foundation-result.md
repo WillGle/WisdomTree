@@ -1,5 +1,10 @@
 # Stage 17.1 — UI Foundation / Design Tokens / Localization result
 
+> **Historical record — status clarified 2026-10-03.** Requirements and results below
+> apply to their original scope and revision. They do not define current product
+> requirements, authorize implementation, or establish current release readiness.
+> Use the [canonical roadmap](../roadmap.md) for current decisions and progress.
+
 ## 1. Result
 
 PASS. The repository now has an isolated, buildable new-UI foundation and direct review route. No existing shell, navigation, domain service, schema, migration, seed, or old route was changed.

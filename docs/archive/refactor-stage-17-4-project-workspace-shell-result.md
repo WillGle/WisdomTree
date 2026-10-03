@@ -1,5 +1,10 @@
 # Stage 17.4 — Project Workspace Shell Result
 
+> **Historical record — status clarified 2026-10-03.** Requirements and results below
+> apply to their original scope and revision. They do not define current product
+> requirements, authorize implementation, or establish current release readiness.
+> Use the [canonical roadmap](../roadmap.md) for current decisions and progress.
+
 ## 1. Result
 
 PASS. `/app/projects/:projectId` now renders a complete Project workspace shell using `getProjectWorkspace(actor, projectId)`. Project identity, research lens, lifecycle status, access type, and capability-aware module navigation are live. Activities/Tasks are operational-member-only, Library is capability-driven, manual URL entry is server-authorized, Project switching preserves module when safe, and `+ New` understands current Project context. No fake data, legacy product leak, generic workspace framework, or new dependencies were introduced.

@@ -1,5 +1,10 @@
 # PC2 — Legacy Capability Resolution Result
 
+> **Historical record — status clarified 2026-10-03.** Requirements and results below
+> apply to their original scope and revision. They do not define current product
+> requirements, authorize implementation, or establish current release readiness.
+> Use the [canonical roadmap](../../roadmap.md) for current decisions and progress.
+
 ## Result
 
 **PC2 COMPLETE.** The owner closed DQ-1 through DQ-4, the non-evidenced password/device UNKNOWN was removed from the baseline, and the approved target-native seams were implemented without restoring legacy screens or architecture.

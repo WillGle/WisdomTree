@@ -1,5 +1,10 @@
 # Stage 17.C — Early UI Cutover + Legacy Frontend Cleanup
 
+> **Historical record — status clarified 2026-10-03.** Requirements and results below
+> apply to their original scope and revision. They do not define current product
+> requirements, authorize implementation, or establish current release readiness.
+> Use the [canonical roadmap](../roadmap.md) for current decisions and progress.
+
 ## 1. Verdict
 
 PASS. The Project-centric `/app` workspace is the only internal application shell. The root route redirects to it, and no target navigation links an archived Tree, Board, Space, Library, Review, WikiRelease, or Personal/Team frontend.

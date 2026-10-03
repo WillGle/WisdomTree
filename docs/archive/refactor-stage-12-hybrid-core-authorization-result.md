@@ -1,5 +1,10 @@
 # Stage 12 — Hybrid Core & Project Authorization Foundation Result
 
+> **Historical record — status clarified 2026-10-03.** Requirements and results below
+> apply to their original scope and revision. They do not define current product
+> requirements, authorize implementation, or establish current release readiness.
+> Use the [canonical roadmap](../roadmap.md) for current decisions and progress.
+
 ## 1. Result
 
 **PASS.** WisdomTree now has an explicit singleton-TMKT Core roster and one centralized, durable research-read rule. Explicit Core can discover and read official research across confirmed Projects without receiving synthetic Project memberships or operational authority.

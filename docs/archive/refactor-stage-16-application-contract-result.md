@@ -1,5 +1,10 @@
 # Stage 16 — Target Application Contract / Delivery Foundation Result
 
+> **Historical record — status clarified 2026-10-03.** Requirements and results below
+> apply to their original scope and revision. They do not define current product
+> requirements, authorize implementation, or establish current release readiness.
+> Use the [canonical roadmap](../roadmap.md) for current decisions and progress.
+
 ## 1. Result
 
 **PASS.** WisdomTree now exposes a Project-centric application facade for the future internal UI without changing schema, routes, UI, navigation, ownership, seed data, or legacy delivery behavior.

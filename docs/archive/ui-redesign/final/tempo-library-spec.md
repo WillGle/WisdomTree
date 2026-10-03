@@ -1,5 +1,10 @@
 # Tempo Library specification
 
+> **Historical record — status clarified 2026-10-03.** Requirements and results below
+> apply to their original scope and revision. They do not define current product
+> requirements, authorize implementation, or establish current release readiness.
+> Use the [canonical roadmap](../../../roadmap.md) for current decisions and progress.
+
 ## Placement
 
 Library is a conditional tab inside any Project whose Stage 16 workspace reports `libraryCirculation: true`. Tempo uses the ordinary Project shell. No name check, special Project type, or global Library entry.

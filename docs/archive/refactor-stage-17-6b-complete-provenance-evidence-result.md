@@ -1,5 +1,10 @@
 # Stage 17.6B — Complete Provenance & Evidence Result
 
+> **Historical record — status clarified 2026-10-03.** Requirements and results below
+> apply to their original scope and revision. They do not define current product
+> requirements, authorize implementation, or establish current release readiness.
+> Use the [canonical roadmap](../roadmap.md) for current decisions and progress.
+
 ## 1. Verdict
 
 **PASS.** Internal Note evidence is now snapshotted against the exact immutable target Note version. Historical reads and restores no longer depend on the mutable current-support projection.

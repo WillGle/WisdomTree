@@ -1,5 +1,10 @@
 # Evidence workflow specification
 
+> **Historical record — status clarified 2026-10-03.** Requirements and results below
+> apply to their original scope and revision. They do not define current product
+> requirements, authorize implementation, or establish current release readiness.
+> Use the [canonical roadmap](../../../roadmap.md) for current decisions and progress.
+
 ## Purpose
 
 Attach immutable supporting research to a Project draft without leaving the writing context. The UI represents `SourceVersion` as a Material version and `TreeNodeVersion` as a Note version.

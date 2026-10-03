@@ -1,5 +1,10 @@
 # Capability-to-UI matrix
 
+> **Historical record — status clarified 2026-10-03.** Requirements and results below
+> apply to their original scope and revision. They do not define current product
+> requirements, authorize implementation, or establish current release readiness.
+> Use the [canonical roadmap](../../../roadmap.md) for current decisions and progress.
+
 ## Rule
 
 The server computes named capability booleans. Stage 17 renders them; it must not reconstruct viewer/contributor/manager/Core/operator logic in the browser. Raw roles below exist only for design/test traceability.

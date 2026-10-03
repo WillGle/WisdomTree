@@ -1,5 +1,10 @@
 # Stage 4A — Existing Space / Project Registration Inventory
 
+> **Historical record — status clarified 2026-10-03.** Requirements and results below
+> apply to their original scope and revision. They do not define current product
+> requirements, authorize implementation, or establish current release readiness.
+> Use the [canonical roadmap](../roadmap.md) for current decisions and progress.
+
 Generated: 2026-09-01 (Asia/Ho_Chi_Minh)  
 Database snapshot: 2026-08-31T20:31:58.473743Z  
 Environment: local Docker PostgreSQL, database `wisdomtree` (credentials omitted)

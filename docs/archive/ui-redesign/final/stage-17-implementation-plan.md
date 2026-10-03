@@ -1,5 +1,10 @@
 # Stage 17 implementation plan
 
+> **Historical record — status clarified 2026-10-03.** Requirements and results below
+> apply to their original scope and revision. They do not define current product
+> requirements, authorize implementation, or establish current release readiness.
+> Use the [canonical roadmap](../../../roadmap.md) for current decisions and progress.
+
 ## Delivery rule
 
 Build the replacement internal UI in parallel with the old UI. Each slice is independently testable and capability-safe. No slice authorizes cutover.

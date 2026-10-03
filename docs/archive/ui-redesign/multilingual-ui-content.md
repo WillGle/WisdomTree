@@ -1,5 +1,10 @@
 # Bilingual UI and multilingual research content
 
+> **Historical record — status clarified 2026-10-03.** Requirements and results below
+> apply to their original scope and revision. They do not define current product
+> requirements, authorize implementation, or establish current release readiness.
+> Use the [canonical roadmap](../../roadmap.md) for current decisions and progress.
+
 ## UI locale contract
 
 Stage 17 UI chrome supports Vietnamese and English. Research content language is independent and unrestricted Unicode. Locale switching changes interface labels, dates, and accessible names; it does not translate stored research.

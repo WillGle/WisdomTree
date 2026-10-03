@@ -1,5 +1,10 @@
 # Stage 17.1 UI foundation
 
+> **Historical record — status clarified 2026-10-03.** Requirements and results below
+> apply to their original scope and revision. They do not define current product
+> requirements, authorize implementation, or establish current release readiness.
+> Use the [canonical roadmap](../../../roadmap.md) for current decisions and progress.
+
 ## 1. Token architecture
 
 The new foundation defines compact semantic tokens in `src/app/components/ui-next/styles.css`. Color tokens describe UI roles rather than domains: background, surface, border, text, accent, focus, success, warning, danger, and information. The same root also owns the interface/research/monospace font stacks, the `1/2/3/4/6/8/12` spacing scale, two radii, one restrained elevation, semantic content widths, and future sidebar dimensions.

@@ -1,5 +1,10 @@
 # PC0 canonical capability ledger
 
+> **Historical record — status clarified 2026-10-03.** Requirements and results below
+> apply to their original scope and revision. They do not define current product
+> requirements, authorize implementation, or establish current release readiness.
+> Use the [canonical roadmap](../../roadmap.md) for current decisions and progress.
+
 Audit date: 2026-09-13. This is a source, clean-room migration, stateful-suite, and Chromium-smoke reverification of the current dirty Stage 17 checkout. `B/F/UI` means backend/application facade/target UI. Browser smoke verifies login, session/app/graph entry, and cron authorization; it is not a full visual acceptance pass for every row.
 
 | Total | PRESERVED | REPLACED | REDESIGNED | EXPLICITLY RETIRED | BACKEND ONLY | MISSING | UNKNOWN |

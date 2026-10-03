@@ -1,5 +1,10 @@
 # Internal publishing interaction specification
 
+> **Historical record — status clarified 2026-10-03.** Requirements and results below
+> apply to their original scope and revision. They do not define current product
+> requirements, authorize implementation, or establish current release readiness.
+> Use the [canonical roadmap](../../../roadmap.md) for current decisions and progress.
+
 ## Boundary
 
 This specification covers internal controls that publish an official Project Note to an immutable public revision. It does not design the public Explore site.

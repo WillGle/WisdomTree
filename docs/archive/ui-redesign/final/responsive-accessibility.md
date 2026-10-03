@@ -1,5 +1,10 @@
 # Responsive and accessibility specification
 
+> **Historical record — status clarified 2026-10-03.** Requirements and results below
+> apply to their original scope and revision. They do not define current product
+> requirements, authorize implementation, or establish current release readiness.
+> Use the [canonical roadmap](../../../roadmap.md) for current decisions and progress.
+
 ## Behavioral width modes
 
 Exact CSS breakpoints are implementation-tuned from content stress tests.

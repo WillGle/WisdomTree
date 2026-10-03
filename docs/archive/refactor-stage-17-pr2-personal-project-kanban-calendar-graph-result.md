@@ -1,5 +1,10 @@
 # Stage 17.PR2 — Personal Projects, Kanban, Internal Calendar & Personal Graph
 
+> **Historical record — status clarified 2026-10-03.** Requirements and results below
+> apply to their original scope and revision. They do not define current product
+> requirements, authorize implementation, or establish current release readiness.
+> Use the [canonical roadmap](../roadmap.md) for current decisions and progress.
+
 ## 1. Verdict
 
 **PASS.** PR2 restores one private Personal Project per active User, Task List/Kanban/Calendar projections over the canonical Task domain, standalone Deadline visibility, membership-bounded ICS, and Project-scoped Graph selection. No Personal Space, Board Task, Calendar Task, or separate Personal Graph model was introduced.

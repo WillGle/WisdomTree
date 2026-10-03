@@ -1,5 +1,10 @@
 # PC4 route-by-route browser scorecard
 
+> **Historical record — status clarified 2026-10-03.** Requirements and results below
+> apply to their original scope and revision. They do not define current product
+> requirements, authorize implementation, or establish current release readiness.
+> Use the [canonical roadmap](../../roadmap.md) for current decisions and progress.
+
 Browser: temporary `nixpkgs#chromium`. Initial real-browser audit used
 1440×900, 768×1024, and 390×844; every row rendered and had no document-level
 horizontal overflow. Final Chromium E2E rechecked altered surfaces and the

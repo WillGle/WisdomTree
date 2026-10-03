@@ -1,5 +1,10 @@
 # Recommended direction
 
+> **Historical record — status clarified 2026-10-03.** Requirements and results below
+> apply to their original scope and revision. They do not define current product
+> requirements, authorize implementation, or establish current release readiness.
+> Use the [canonical roadmap](../../roadmap.md) for current decisions and progress.
+
 ## Recommendation: deliberate A + B hybrid
 
 Use **Concept A's Project Workspace as the default shell** and integrate a limited set of **Concept B's Research Studio interactions**. Do not adopt Concept C as the universal shell.
