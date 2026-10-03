@@ -1,0 +1,216 @@
+# Architecture
+
+> **Retired reference — 2026-10-03.** Preserved from commit `addc66c`;
+> superseded by the [current documentation](../../README.md) and
+> [canonical roadmap](../../roadmap.md). Old requirements, commands, and links
+> describe their original context and must be checked before use.
+
+One deployable: **Next.js (App Router) + Drizzle ORM + PostgreSQL**, a
+modular monolith. No workers, no queues, no second service.
+
+## Layers (enforced, not aspirational)
+
+| Layer          | Path                                   | May do                              | May not do                                                  |
+| -------------- | -------------------------------------- | ----------------------------------- | ----------------------------------------------------------- |
+| Delivery       | `src/app/**`                           | Render, read params, call a service | Touch the DB — no `@/db`, no `*/schema`, no `drizzle-orm`   |
+| Business logic | `src/modules/<module>/*`               | Authorize, query, transact, audit   | Reach into another module's tables (convention — see below) |
+| Data           | `src/db/**`, `src/modules/*/schema.ts` | Connection, tables, migrations      | Contain business rules                                      |
+
+`scripts/boundaries.test.ts` greps the delivery layer for DB imports on
+every `npm test`; it has caught a real cross-space leak. That is the one
+machine-enforced rule; the module-to-module line is convention, reviewed
+by eye — modules call each other's services freely and share transactions
+(notifyEvent, recordAudit run inside the caller's tx).
+
+## Modules
+
+### Next.js delivery
+
+The delivery layer is implemented as `src/app/**` and handles rendering, reading parameters, and calling services. It does not directly access the database — no `@/db`, no `*/schema`, no `drizzle-orm`.
+
+### Project-centric application facade
+
+The application layer provides project-centric APIs and acts as a facade
+over domain modules. It is implemented as `src/modules/application/`.
+
+- **application** — project-centric APIs for notes, materials, activities,
+tasks, people, and tempo (library/circulation).
+
+### Current product/domain modules
+
+These services implement the current project-centric vocabulary:
+
+- **project** — project domain including capabilities, permissions, and
+  project context.
+- **person** — canonical person identity independent from authenticated
+  users.
+- **activity** — collaborative work context for projects.
+- **search** — internal research search functionality.
+- **publication** — note publishing system and public versioning.
+
+These modules are conceptually distinct from the implementation infrastructure below —
+they expose project-centric operations for Notes, Materials, Activities, Tasks,
+People, Search, Publication, Tempo, etc.
+
+### Reused foundational implementation modules
+
+These modules provide the existing implementation infrastructure and legacy persistence vocabulary:
+
+- **auth** — users, sessions, the `authorize()` catalog, admin user
+  management, OIDC, the dev-only demo login.
+- **storage** — spaces & membership, folders, sources (files) with
+  versioning, OCR/pandoc extraction (`extraction.ts`, in-process),
+  extraction candidates ("my OCR imports"), categories, and
+  `physical.ts`: books as Library items (`source_physical`, 1:1 with
+  `sources`).
+- **circulation** — the loan state machine
+  (`requested → approved → borrowed → returned`, + declined/overdue) over
+  physical items; one active loan per item enforced by a partial unique
+  index.
+- **knowledge** — space-scoped hierarchical branches, ordered tree nodes with
+  safe Markdown content and optional English translations,
+  append-only `tree_node_versions`, wiki/typed links, tags, the one
+  proposal table (`node_proposals`, kind = change | publication),
+  per-user `node_drafts`, promotions (provenance), presence, and the graph read-side
+  (`graph-provider.ts`) feeding the graph view.
+- **pm** — tasks (board), deadlines (+reminders, checklists, links),
+  calendar tokens/ICS.
+- **notify** — comments with inline `@mentions`, the in-app notification
+  center, per-event opt-out, and the fan-out (`fanout.ts`).
+- **export** — the legacy full-tree Admin/Op export plus official per-space
+  wiki releases. A release selects only non-archived team content marked
+  `verified + publish`, validates links and Markdown, writes deterministic
+  `topics/<node-id>/<locale>.md`, `vault.xml`, and `links.xml`, then verifies
+  the exact Git tree. PostgreSQL remains authoritative; released snapshots
+  are immutable and can rebuild `data/vault-repos/<space-id>.git`.
+- **audit** — the `recordAudit` helper; `audit_events` is
+  append-only (DB trigger) and read back on `/admin`.
+
+Note that the application facade exposes project-centric operations for Notes,
+Materials, Activities, Tasks, People, Search, Publication, Tempo, etc.
+
+The implementation vocabulary may adapt/reuse concepts from the legacy vocabulary:
+
+- Space / Branch / TreeNode / Source / Deadline / WikiRelease
+
+Different names across these layers are intentional and do not imply
+a schema migration is required.
+
+## Authorization
+
+`authorize(actor, permission, resource)` is the single gate
+(`src/modules/auth/authorize.ts`). Roles carry the vertical axis
+(user/editor/admin_op — no capability table, no vault grants); the
+**scope** qualifier does the per-record work: `global`, `space` (with a
+viewer<contributor<manager ladder over `space_members`), `self`, and
+`owned-or-assigned`. Denied reads throw 404 (no existence leak); denied
+writes throw 403.
+
+Branch visibility derives from the branch row itself: a `team` branch
+is visible only to members of its `space_id`, while a `personal` branch is
+visible only to its owner (`branchVisibilityCondition`). Team edits and
+reviews require both the appropriate global role and space membership;
+cross-space node links are refused.
+
+## Wiki projection and recovery
+
+PostgreSQL owns editable content and authorization. A release stores its exact
+file snapshot and SHA-256 manifest in `wiki_releases`; a database trigger
+rejects updates or deletion after status becomes `released`. The Git mirror is
+a recoverable projection, not an input. Verify compares every path and byte
+against the stored snapshot; rebuild rewrites the mirror from that snapshot
+without changing the release row.
+
+## Sessions, timeout, traffic cap
+
+- Sessions are server-side rows (`sessions`), the cookie holds a random
+  token and the DB only its SHA-256. Revocable per user (and revoked on
+  disable); rows expired 30+ days are purged by the cron tick.
+- **Inactivity timeout**: `last_seen_at` is written on every request and
+  read on resolve — idle past `SESSION_IDLE_MS` (default 30 min) reads
+  as signed out; `SESSION_TTL_MS` (7 days) is the absolute cap.
+- **Traffic cap**: every resolved principal passes
+  `enforceUserRateLimit` (default 240 req/min per account, in-process —
+  fine for the single-instance deployment).
+- **Demo login** (`auth/dev-login.ts`): a seeded-member picker that
+  exists only when `NODE_ENV !== "production"`; no env override.
+  Automated tests do not use it — they insert a session row directly
+  (`tests/setup.ts`, `tests/e2e/global-setup.ts`).
+
+## Wiki editing lifecycle
+
+- **Personal branches: live edit.** `updateNode` saves immediately under
+  an optimistic version check; every save appends a complete
+  `tree_node_versions` row. `/tree/node/:id/history` shows the chain,
+  diffs any two versions (`src/lib/diff.ts`, line LCS) and restores by
+  appending — history is never rewritten (append-only trigger).
+- **Team pages: private draft over official content.** Each contributor edits
+  their own `node_drafts` row. Autosave uses a draft version, publishing uses
+  the official base version, and a conflict must be merged before retrying.
+  Readers, search, graph, and releases continue to use only the official
+  `tree_nodes` / `node_translations` rows.
+- **Protected pages use review.** A manager can set `review_required`; those
+  drafts become an inline proposal and need an independent reviewer. Normal
+  pages are self-published by contributors. Existing verified/published pages
+  are protected by migration.
+- **Promotion remains a review boundary.** A personal node is
+  proposed onto a team branch (`node_proposals`, kind=publication); an
+  independent reviewer (editor/admin, never the submitter —
+  `assertIndependentReviewer`) decides; approval creates the promoted
+  node and a `promotions` provenance row.
+- **Presence is advisory, not a lock.** The editor shows who else is on the
+  page. Concurrent saves are protected by optimistic checks; no user owns a
+  hard file lock.
+- **Restore cannot bypass protection.** Restoring a shared revision creates a
+  personal draft based on the current official version. It then follows the
+  same self-publish or protected-review path.
+
+## Library, books, loans
+
+Books are Library items: the `sources` row carries title/space/category
+("Sách" is seeded; more categories are an INSERT), `source_physical`
+carries the shelf facts (LIB-code, author, location, copies, status).
+Loans hang off the physical row; state transitions, the copies-vs-loans
+guards, and the per-item loan register live in `circulation/service.ts`.
+
+The loan desk is `/library/loans`; the item page hosts request/approve/
+hand-over/return.
+
+## Notifications
+
+Mutations call `notifyEvent` inside their own transaction
+(`notify/fanout.ts`): recipients come from the event matrix, per-event
+opt-out from `notification_preferences`, and the in-app center is the
+only channel — the notifications row is delivery itself; a second real
+channel brings its own bookkeeping. Deadline reminders are
+the one time-driven producer: the `POST /api/cron/dispatch` cron fires
+them exactly-once via the `(deadline_id, offset)` PK.
+
+## Graph view
+
+Server: `modules/knowledge/graph-provider.ts` loads visible nodes/edges/tags.
+Client: `src/app/components/knowledge-map/` renders them with the
+open-source **force-graph** engine (canvas 2D, d3-force). The component
+owns product behavior — verification shapes (circle/diamond/square),
+label LOD, per-link-type colors/arrows, hover preview cards, context
+menu, keyboard navigation with aria-live, the filter pipeline, ego mode
+(`?node=&depth=`), and the settings panel whose seven sliders map to
+d3 forces with the invariant _slider midpoint = shipped default_
+(unit-tested). Client-only: no SSR graph markup.
+
+## Extraction (OCR)
+
+`storage/extraction.ts` routes by MIME: images/PDF → tesseract (with
+Vietnamese language data), docx/odt/html → pandoc, text → direct. The
+assembled markdown lands in `extraction_candidates`; the uploader
+evolves it into a node in their personal branch, and review happens only
+at promotion. Failure never blocks storage — the original file is
+always kept and downloadable.
+
+## Error contract
+
+`ApiError { status, code, message(EN), details? }`. Codes are stable;
+the FE translates by code (`src/lib/vi/errors.ts`), interpolating from
+`details` (e.g. `holderName`, `onLoan`, `retryAfterSeconds`), and falls
+back to the English message for unknown codes. `change_summary` values
+in `tree_node_versions` are stable English codes translated at render.

@@ -1,5 +1,8 @@
 # Vault Foundation Implementation Plan
 
+> **Status — 2026-10-03:** Historical implementation plan. The Vault-centered product direction is superseded. Retain this for migration context, not instructions to resume work.
+> Current requirements, order, and progress: [canonical roadmap](../../../roadmap.md).
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox syntax for tracking. User instructions override skill defaults: do not write new tests, preserve unrelated dirty state, and make minimal changes.
 
 **Goal:** Cho người dùng tạo nhiều vault độc lập, quản lý người được đọc và liên kết vault với hồ sơ dự án, đồng thời giữ dữ liệu và đường dẫn cũ hoạt động.

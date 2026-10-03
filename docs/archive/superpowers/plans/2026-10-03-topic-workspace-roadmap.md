@@ -1,5 +1,8 @@
 # Topic Workspace Delivery Roadmap
 
+> **Status — 2026-10-03:** Superseded panel-first sequence. Status and baseline below describe the original proposal; do not execute this order.
+> Current requirements, order, and progress: [canonical roadmap](../../../roadmap.md).
+
 **Status:** proposed sequence for review; no implementation started.
 **Spec:** [approved product brief](../specs/2026-10-03-topic-workspace-product-brief.md).
 **Inspected baseline:** `db915a6`.

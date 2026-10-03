@@ -1,5 +1,8 @@
 # Personal Reference Panels Implementation Plan
 
+> **Status — 2026-10-03:** Paused prototype plan, retained as a phase-3 candidate. Reconcile it with phases 1–2 before reuse. Its unfinished implementation is unmerged and has no accepted final validation.
+> Current requirements, order, and progress: [canonical roadmap](../../../roadmap.md).
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:executing-plans for inline implementation, or superpowers:subagent-driven-development if the user selects delegated execution. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Write in the existing note editor with independently opened reference notes and materials beside it.

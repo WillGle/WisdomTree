@@ -1,5 +1,8 @@
 # WisdomTree Target Architecture
 
+> **Status — 2026-10-03:** Superseded target design. Its scope, priorities, and publication rules are historical; they do not override the current roadmap.
+> Current requirements, order, and progress: [canonical roadmap](../roadmap.md).
+
 This document defines the **target product architecture** for WisdomTree.
 
 It is intentionally stricter than a code inventory. The repository may still contain compatibility routes, legacy storage concepts, or transitional implementation details. Those do not redefine the target product.

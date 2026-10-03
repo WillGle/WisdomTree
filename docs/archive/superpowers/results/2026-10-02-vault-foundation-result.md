@@ -1,5 +1,8 @@
 # Vault foundation — kết quả và giới hạn kiểm chứng
 
+> **Status — 2026-10-03:** Historical implementation evidence. Results and phase names apply to the recorded work, not completion of the current six-phase roadmap.
+> Current requirements, order, and progress: [canonical roadmap](../../../roadmap.md).
+
 Ngày: 2026-10-02. Triển khai phase 1 theo plan đã duyệt; không có AI. Mã nguồn đã commit, nhưng gate E2E chưa ổn định nên chưa tuyên bố toàn bộ validation đạt.
 
 Branch: `feat/vault-foundation-20261002`.

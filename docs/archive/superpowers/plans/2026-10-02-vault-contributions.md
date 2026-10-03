@@ -1,5 +1,8 @@
 # Vault Contributions Implementation Plan
 
+> **Status — 2026-10-03:** Superseded and stopped Vault plan. Earlier priority and execution instructions below are historical, not the current work queue.
+> Current requirements, order, and progress: [canonical roadmap](../../../roadmap.md).
+
 > Cập nhật yêu cầu 2026-10-02: người dùng bỏ Vault khỏi luồng sản phẩm, dùng Project làm trọng tâm. Thiết kế Vault dưới đây là lịch sử; phase 2 Vault đã dừng, không tiếp tục triển khai theo plan này. Ưu tiên hiện tại: làm gọn Project, thống nhất trang con và hướng dẫn trong popup [?].
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:executing-plans, native execution task-by-task. User instructions override defaults: minimal changes, no new tests/assertions, no dependencies, atomic commits. One independent whole-change review at the end.

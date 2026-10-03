@@ -1,9 +1,10 @@
 # WisdomTree: personal exploration and shared topic workspaces
 
 Date: 2026-10-03.
-Status: product brief for review, based on the owner's decisions in conversation.
-This records intended behavior, not an implementation or release claim. Technical
-design and implementation planning follow review of this brief.
+Status: archived product discussion. Current agreed intent is maintained in
+[product.md](../../../product.md) and the roadmap. The [canonical roadmap](../../../roadmap.md)
+owns subsequent decisions, unresolved edges, delivery order, and progress.
+This is not an implementation or release claim; use the roadmap if details differ.
 
 ## Purpose and audience
 
@@ -188,36 +189,14 @@ features are not authorized for removal by this brief.
 10. Private link placeholders and suggestions reveal no inaccessible titles,
     previews, or content.
 
-## Decisions needed before technical implementation
+## Open decisions and implementation mapping
 
-These are deliberately unresolved product edges, not permission to invent behavior:
+The current unresolved decisions are D1–D8 in the [roadmap](../../../roadmap.md).
+Maintain them there rather than keeping a second decision list in this brief.
 
-- Whether topic ownership can have multiple owners or be transferred, and what
-  happens to contributor access after removal from a topic.
-- Whether a contributed item can return to personal ownership or move to another
-  owning topic, and how existing references behave during that transition.
-- How direct grants and inherited folder grants combine when an item moves, and
-  whether any folder-level permission exceptions are needed.
-- Whether contributors can withdraw contributions after ownership transfer, and
-  what deleting an already-public note does to its public page.
-- Which file formats must render or play in the first version, with download
-  fallback for unsupported formats.
-- Save/checkpoint boundaries for live editing, reconnect behavior, and how much
-  board history needs direct restoration as opposed to an audit record.
-
-## Relationship to the existing application
-
-This brief captures the latest conversational intent. Existing README/product
-documents describe earlier product framings and are not proof this scope exists.
-In particular, this brief's public-on-save behavior differs from the earlier
-immutable public-revision model, and topic ownership differs from the earlier
-creator-controlled sharing model after contribution.
-
-"Topic" is the user's product concept here. Whether it maps to the existing
-Project domain requires a source audit; this brief does not prescribe a schema
-rename, a new container, or a database migration.
-
-After product review, compare the current implementation with these requirements
-and plan independent phases: ownership/access/history; personal content and
-materials; the live whiteboard and panels; connections and tasks; writing and
-public saving. These are planning boundaries, not approved implementation steps.
+The agreed mapping reuses the existing Project identity for the topic workspace.
+It does not introduce another Topic/Vault container or require a schema rename.
+Existing wiki and publication mechanisms are migration context; they do not
+replace the intended personal ownership, explicit contribution, and public-on-save
+contracts. Follow the roadmap's six phases, beginning with ownership and access,
+not the earlier panel-first sequence.
